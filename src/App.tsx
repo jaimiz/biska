@@ -13,30 +13,30 @@ import { ProfileSheet } from "./components/user/ProfileSheet";
 function AppRouter() {
 	const router = createBrowserRouter([
 		{
-			path: "/", element: <RootRoute />, children: [
+			path: "/",
+			element: <RootRoute />,
+			children: [
 				{
 					path: ":expand?",
 					Component: IndexRoute,
 					children: [
 						{
 							path: "profile/:handleOrDid",
-							Component: ProfileSheet
-						}
-					]
+							Component: ProfileSheet,
+						},
+					],
 				},
-			]
+			],
 		},
-	])
-	return (
-		<RouterProvider router={router} />
-	);
+	]);
+	return <RouterProvider router={router} />;
 }
 function AppLogin() {
 	const { isInitialLoad } = useAtomValue(sessionAtom);
 	const currentAccount = useAtomValue(currentAccountAtom);
 	// init
 	useEffect(() => {
-		const account = persisted.get("session").currentAccount
+		const account = persisted.get("session").currentAccount;
 		api.resumeSession(account);
 	}, []);
 

@@ -1,10 +1,10 @@
-import { BskyAgent } from '@atproto/api'
+import { BskyAgent } from "@atproto/api";
 
 export const PUBLIC_BSKY_AGENT = new BskyAgent({
-	service: 'https://api.bsky.app',
-})
+	service: "https://api.bsky.app",
+});
 
-export const BSKY_SOCIAL_SERVICE = 'https://bsky.social'
+export const BSKY_SOCIAL_SERVICE = "https://bsky.social";
 
 export const STALE = {
 	MINUTES: {
@@ -15,4 +15,4 @@ export const STALE = {
 		ONE: 1e3 * 60 * 60,
 	},
 	INFINITY: Infinity,
-}
+};

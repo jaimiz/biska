@@ -16,7 +16,10 @@ function generateExpandOrShrinkLink(location: Location, isExpanded = true) {
 	}
 	return `/expand${location.pathname}`;
 }
-export function Drawer({ children, open }: PropsWithChildren<{ open: boolean }>) {
+export function Drawer({
+	children,
+	open,
+}: PropsWithChildren<{ open: boolean }>) {
 	const location = useLocation();
 	const params = useParams();
 	const { expand } = params;
@@ -52,7 +55,7 @@ export function Drawer({ children, open }: PropsWithChildren<{ open: boolean }>)
 					className="absolute p-1 text-primary-foreground left-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none bg-primary"
 					to={generateExpandOrShrinkLink(location, isExpanded)}
 					onClick={() => {
-						setPrevExpand((s) => s ? "expand" : undefined);
+						setPrevExpand((s) => (s ? "expand" : undefined));
 					}}
 				>
 					{isExpanded ? (

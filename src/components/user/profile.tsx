@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { RichText } from "../text";
 import { Button } from "../ui/button";
 import { UserAvatar } from "./avatar";
+
 export function ProfileSheet() {
   const { handleOrDid } = useParams();
   const { isLoading, data: profile } = useProfileQuery({ did: handleOrDid as Did })
@@ -13,13 +14,10 @@ export function ProfileSheet() {
   const { profilePostsQuery: timelineQuery, profilePostsData: timelineData } = useProfilePosts(handleOrDid)
   // End Load user posts
   const descriptionRT = useMemo(() => {
-    if (profile?.description) {
       return new RichTextAPI({
-        text: profile.description
+        text: profile?.description ?? ""
       })
-    }
-    return undefined;
-  }, [profile])
+    }, [profile])
 
   if (isLoading) {
     return "Loading";

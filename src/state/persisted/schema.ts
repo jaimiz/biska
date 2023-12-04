@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /* Custom zod types */
 const did = z.custom<`did:plc:${string}`>((val) => {
-	return typeof val === "string" ? val.startsWith("did:plc:") : false
-}, "Must be a valid did:plc: string")
+	return typeof val === "string" ? val.startsWith("did:plc:") : false;
+}, "Must be a valid did:plc: string");
 
-export type Did = z.infer<typeof did>
+export type Did = z.infer<typeof did>;
 
 /* Schema */
 
@@ -18,17 +18,17 @@ const accountSchema = z.object({
 	emailConfirmed: z.boolean(),
 	refreshJwt: z.string().optional(), // optional because it can expire
 	accessJwt: z.string().optional(), // optional because it can expire
-})
+});
 
-export type PersistedAccount = z.infer<typeof accountSchema>
+export type PersistedAccount = z.infer<typeof accountSchema>;
 
 const preferencesSchema = z.object({
 	interface: z.object({
-		profilePictureStyle: z.enum(["round", "square"]).default('square'),
-	})
-})
+		profilePictureStyle: z.enum(["round", "square"]).default("square"),
+	}),
+});
 
-export type Preferences = z.infer<typeof preferencesSchema>
+export type Preferences = z.infer<typeof preferencesSchema>;
 
 const columnSettingsSchema = z.object({
 	name: z.string(),
@@ -39,24 +39,24 @@ const columnSchema = z.discriminatedUnion("type", [
 	z.object({
 		type: z.enum(["skyline"]),
 		account: did,
-		settings: columnSettingsSchema
-	})
+		settings: columnSettingsSchema,
+	}),
 ]);
 
-export type Column = z.infer<typeof columnSchema>
+export type Column = z.infer<typeof columnSchema>;
 
 /* General Schema */
 
 export const AppSchema = z.object({
 	session: z.object({
 		accounts: z.array(accountSchema),
-		currentAccount: accountSchema.optional()
+		currentAccount: accountSchema.optional(),
 	}),
 	preferences: preferencesSchema,
-	columns: z.array(columnSchema)
-})
+	columns: z.array(columnSchema),
+});
 
-export type AppSchema = z.infer<typeof AppSchema>
+export type AppSchema = z.infer<typeof AppSchema>;
 
 export type AppSchemaKey = keyof AppSchema;
 
@@ -66,8 +66,8 @@ export const defaultAppSchema: AppSchema = {
 	},
 	preferences: {
 		interface: {
-			profilePictureStyle: "square"
-		}
+			profilePictureStyle: "square",
+		},
 	},
-	columns: []
-}
+	columns: [],
+};

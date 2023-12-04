@@ -6,7 +6,7 @@ export function useTimelineQuery() {
 		queryKey: ["timeline"],
 		queryFn: async () => {
 			const res = await getAgent().getTimeline();
-			return res
-		}
-	})
+			return res;
+		},
+	});
 }

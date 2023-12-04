@@ -8,8 +8,11 @@ export function getInitials(text: string) {
 	if (!second) {
 		return `${first.slice(0, 1).toUpperCase()}${first.slice(1, 2)}`;
 	}
-	return `${first.slice(0, 1).toUpperCase()}${second.slice(0, 1).toUpperCase()}`
+	return `${first.slice(0, 1).toUpperCase()}${second
+		.slice(0, 1)
+		.toUpperCase()}`;
 }
 
 /* Removes non alphanumeric characters from a string */
-export const normalizeString = (str: string) => str.replace(/[^A-zÀ-ú\p{N}\p{P}\p{Z}^$\n]/gu, "").trim()
+export const normalizeString = (str: string) =>
+	str.replace(/[^A-zÀ-ú\p{N}\p{P}\p{Z}^$\n]/gu, "").trim();
