@@ -17,7 +17,7 @@ export type Session = {
 	currentAccount: PersistedAccount | undefined;
 };
 
-export const sessionAtom = atom<Session>({
+export const sessionAtom = atom < Session > ({
 	isInitialLoad: true,
 	isSwitchingAccounts: false,
 	accounts: [],
@@ -29,7 +29,7 @@ sessionAtom.onMount = (setAtom) => {
 		isInitialLoad: true,
 		isSwitchingAccounts: false,
 		accounts: persisted.get("session").accounts,
-		currentAccount: undefined,
+		currentAccount: persisted.get('session').currentAccount,
 	});
 };
 

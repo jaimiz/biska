@@ -8,8 +8,9 @@ import { IndexRoute } from "./routes/guarded";
 import { RootRoute } from "./routes/guarded/root";
 import * as persisted from "./state/persisted";
 import { api, currentAccountAtom, sessionAtom } from "./state/session";
-import { ProfileSheet } from "./components/user/ProfileSheet";
 import { Search } from "./routes/guarded/search";
+import { Profile } from "./components/user/profile";
+import { TimeTickProvider } from "./state/app";
 
 export function AppRouter() {
 	const router = createBrowserRouter([
@@ -23,14 +24,18 @@ export function AppRouter() {
 					children: [
 						{
 							path: "profile/:handleOrDid",
-							Component: ProfileSheet,
+							Component: Profile,
 						},
 					],
 				},
 			],
 		},
 	]);
-	return <RouterProvider router={router} />;
+	return (
+		<TimeTickProvider>
+			<RouterProvider router={router} />
+		</TimeTickProvider>
+	);
 }
 function AppLogin() {
 	const { isInitialLoad } = useAtomValue(sessionAtom);

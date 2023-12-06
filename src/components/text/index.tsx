@@ -7,7 +7,7 @@ import { PropsWithChildren } from "react";
 const richTextVariants = cva("", {
 	variants: {
 		format: {
-			formatted: "whitespace-pre-wrap break-words text-sm",
+			formatted: "whitespace-pre-wrap break-words",
 			none: "",
 		},
 	},
@@ -53,16 +53,24 @@ export function RichText({ richText, className, format }: RichTextProps) {
 		const link = segment.link;
 		const mention = segment.mention;
 		if (mention && AppBskyRichtextFacet.validateMention(mention).success) {
+			console.log("valid", { mention });
 			els.push(
 				<a key={key} href={`/profile/${mention.did}`}>
-					{" "}
+					{segment.text}
+				</a>,
+			);
+		} else if (mention?.did) {
+			// TODO: This is an optmistc mention, so we'll just us the handle and not the
+			// resolved did. I want to implement a cache for this in the future, but
+			// for now this is fine.
+			els.push(
+				<a key={key} href={`/profile/${mention.did}`}>
 					{segment.text}
 				</a>,
 			);
 		} else if (link && AppBskyRichtextFacet.validateLink(link).success) {
 			els.push(
 				<a key={key} href={`${link.uri}`}>
-					{" "}
 					{segment.text}
 				</a>,
 			);
