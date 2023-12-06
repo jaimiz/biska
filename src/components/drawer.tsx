@@ -2,20 +2,29 @@ import { cn } from "@/lib/utils";
 import { ExpandIcon, ShrinkIcon } from "lucide-react";
 import { PropsWithChildren, useState } from "react";
 import {
-	Link,
 	Location,
 	useLocation,
 	useNavigate,
 	useParams,
 } from "react-router-dom";
 import { Sheet, SheetContent } from "./ui/sheet";
+import { cva } from "class-variance-authority";
+import { AppLink, ExpandOrShrinkLink, generateExpandOrShrinkLink } from "./link";
 
-function generateExpandOrShrinkLink(location: Location, isExpanded = true) {
-	if (isExpanded) {
-		return location.pathname.replace("/expand", "");
-	}
-	return `/expand${location.pathname}`;
-}
+const DrawerVariants = cva(
+	"p-0 w-full max-w-none overflow-y-auto overflow-x-visible sm:max-w-none transition-all",
+	{
+		variants: {
+			expanded: {
+				shrunken: ["lg:w-1/3"],
+				expanded: ["lg:w-full", "is-expanded"],
+			},
+		},
+		defaultVariants: {
+			expanded: "shrunken",
+		},
+	},
+);
 export function Drawer({
 	children,
 	open,
@@ -43,17 +52,15 @@ export function Drawer({
 			<SheetContent
 				side={"right"}
 				className={cn(
-					"p-0 w-full max-w-none overflow-y-auto overflow-x-visible sm:max-w-none transition-all",
-					{
-						"lg:w-1/3": !isExpanded,
-						"lg:w-full": isExpanded,
-					},
+					DrawerVariants({
+						expanded: isExpanded ? "expanded" : "shrunken",
+					}),
 				)}
 			>
 				{children}
-				<Link
+				<ExpandOrShrinkLink
 					className="absolute p-1 text-primary-foreground left-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none bg-primary"
-					to={generateExpandOrShrinkLink(location, isExpanded)}
+					to={location}
 					onClick={() => {
 						setPrevExpand((s) => (s ? "expand" : undefined));
 					}}
@@ -63,7 +70,7 @@ export function Drawer({
 					) : (
 						<ExpandIcon className="h-4 w-4" />
 					)}
-				</Link>
+				</ExpandOrShrinkLink>
 			</SheetContent>
 		</Sheet>
 	);

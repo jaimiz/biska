@@ -18,34 +18,17 @@ export function useProfileQuery({ did }: { did: Did | undefined }) {
 			return res.data;
 		},
 		enabled: !!did,
-	});
+	})
 }
 
-type TimelineEntry = {
-	item: AuthorFeedItem;
-	hasReply: boolean;
-	filter: AuthorFeedFilters;
-};
 
-type AuthorFeedItem = {
-	uri: string;
-	post: AppBskyFeedDefs.PostView;
+export type SkylineSliceItem = {
 	record: AppBskyFeedPost.Record;
-	reason?: AppBskyFeedDefs.ReasonRepost;
+	post: AppBskyFeedDefs.PostView;
+	reason: AppBskyFeedDefs.ReasonRepost;
 };
 
 type AuthorFeedFilters = AppBskyFeedGetAuthorFeed.QueryParams["filter"];
-
-async function fetchUserPosts(params: AppBskyFeedGetAuthorFeed.QueryParams) {
-	const res = await getAgent().getAuthorFeed({
-		...params,
-	});
-	if (!res.success) {
-		return { posts: [], cursor: undefined };
-	}
-	const { cursor, feed } = res.data;
-	return { cursor, feed } as const;
-}
 
 export const useProfilePosts = (
 	handle?: string,
@@ -55,46 +38,38 @@ export const useProfilePosts = (
 
 	const actor = handle ?? agent.session?.did;
 
-	const profilePostsQuery = useInfiniteQuery<
-		Awaited<ReturnType<typeof fetchUserPosts>>
-	>({
-		initialPageParam: undefined,
-		getPreviousPageParam: (firstPage) => firstPage.cursor,
+	if (!actor) throw new Error("Not logged in");
+
+	const profilePostsQuery = useInfiniteQuery<{
+		cursor?: string;
+		feed: AppBskyFeedDefs.FeedViewPost[];
+	}>({
 		getNextPageParam: (lastPage) => lastPage.cursor,
+		getPreviousPageParam: (firstPage) => firstPage.cursor,
+		initialPageParam: undefined,
 		queryKey: ["profile", actor, "feed", filter],
-		queryFn: async ({ pageParam }): ReturnType<typeof fetchUserPosts> => {
-			if (!actor) throw new Error("Not logged in");
-			return await fetchUserPosts({
+		queryFn: async ({ pageParam }) => {
+			const res = await getAgent().getAuthorFeed({
 				actor,
 				filter,
-				cursor: (pageParam as string) ?? undefined,
+				cursor: pageParam as string ?? undefined
 			});
+			const { cursor, feed } = res.data;
+			return { cursor, feed } as const;
 		},
 	});
 
 	const profilePostsData = useMemo(() => {
 		if (!profilePostsQuery.data) return [];
-		const flat = profilePostsQuery.data.pages
-			.flatMap((page) => page.feed as AppBskyFeedDefs.FeedViewPost[])
-			.filter((item) => {
-				console.log({ item });
-				return item !== undefined;
-			});
-		return flat.flatMap<TimelineEntry>((item) => {
-			return [
-				{
-					item: {
-						record: item.post.record as AppBskyFeedPost.Record,
-						post: item.post,
-						uri: item.post.uri,
-						reason: item.reason as AppBskyFeedDefs.ReasonRepost,
-					},
-					hasReply: false,
-					filter,
-				},
-			];
+		const flat = profilePostsQuery.data.pages.flatMap((page) => page.feed);
+		return flat.flatMap<SkylineSliceItem>((item) => {
+			return {
+				record: item.post.record as AppBskyFeedPost.Record,
+				post: item.post,
+				reason: item.reason as AppBskyFeedDefs.ReasonRepost,
+			};
 		});
-	}, [profilePostsQuery, filter]);
+	}, [profilePostsQuery]);
 
 	return { profilePostsQuery, profilePostsData };
 };

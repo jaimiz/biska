@@ -1,19 +1,15 @@
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { UserAvatar } from "./avatar";
-import { AppLink } from "../link";
+import { Link } from "react-router-dom";
 
-type ProfileCardProps = {
+type ProfileDisplayNameProps = {
 	profile: ProfileViewDetailed;
 };
-export function ProfileCard(props: ProfileCardProps) {
+
+export function ProfileDisplayName(props: ProfileDisplayNameProps) {
 	const { profile } = props;
 	return (
-		<AppLink
-			to={`/profile/${profile.handle}`}
-			className="px-6 py-4 flex items-center gap-3"
-		>
-			<UserAvatar className="h-9 w-9" profile={profile} />
-			<div>
+		<Link to={`/profile/${profile.handle}`} className="flex items-center">
+			<div className="flex gap-x-2">
 				{profile.displayName ? (
 					<div className="font-medium">{`${profile.displayName}`}</div>
 				) : null}
@@ -21,6 +17,6 @@ export function ProfileCard(props: ProfileCardProps) {
 					@{profile.handle}
 				</div>
 			</div>
-		</AppLink>
+		</Link>
 	);
 }
