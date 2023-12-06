@@ -1,5 +1,5 @@
 import { RefAttributes } from "react";
-import { Link as RouterLink, LinkProps as RouterLinkProps, Location as RouterLocation, To } from "react-router-dom";
+import { Link as RouterLink, LinkProps as RouterLinkProps, To } from "react-router-dom";
 
 
 const EXPANDED_LINK_PREFIX = "/expand";

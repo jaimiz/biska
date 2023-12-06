@@ -1,15 +1,14 @@
 import { cn } from "@/lib/utils";
+import { cva } from "class-variance-authority";
 import { ExpandIcon, ShrinkIcon } from "lucide-react";
 import { PropsWithChildren, useState } from "react";
 import {
-	Location,
 	useLocation,
 	useNavigate,
 	useParams,
 } from "react-router-dom";
+import { ExpandOrShrinkLink } from "./link";
 import { Sheet, SheetContent } from "./ui/sheet";
-import { cva } from "class-variance-authority";
-import { AppLink, ExpandOrShrinkLink, generateExpandOrShrinkLink } from "./link";
 
 const DrawerVariants = cva(
 	"p-0 w-full max-w-none overflow-y-auto overflow-x-visible sm:max-w-none transition-all",
