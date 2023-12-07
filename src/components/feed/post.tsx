@@ -8,12 +8,6 @@ import {
 	RichText as RichTextAPI,
 } from "@atproto/api";
 import { ClassValue } from "clsx";
-import { useMemo } from "react";
-import { RichText } from "../text";
-import { TimeElapsed } from "../text/time-elapsed";
-import { UserAvatar } from "../user/avatar";
-import { ProfileDisplayName } from "../user/profile-display-name";
-import { makeWrapper } from "../util/wrapper-factory";
 import {
 	MessageSquareDashedIcon,
 	MessageSquareIcon,
@@ -21,6 +15,12 @@ import {
 	Repeat2Icon,
 	StarIcon,
 } from "lucide-react";
+import { useMemo } from "react";
+import { RichText } from "../text";
+import { TimeElapsed } from "../text/time-elapsed";
+import { UserAvatar } from "../user/avatar";
+import { ProfileDisplayName } from "../user/profile-display-name";
+import { makeWrapper } from "../util/wrapper-factory";
 
 type PostProps = SkylineSliceItem;
 export function Post({ post, record }: PostProps) {

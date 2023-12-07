@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { BSKY_SOCIAL_SERVICE } from "@/state/queries";
 import { api } from "@/state/session";
 import { Cloud } from "lucide-react";
 import { useState } from "react";
@@ -14,7 +15,6 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { BSKY_SOCIAL_SERVICE } from "@/state/queries";
 
 export function BlueskyLogin() {
 	const [open, setOpen] = useState(false);

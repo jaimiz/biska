@@ -1,6 +1,6 @@
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { UserAvatar } from "./avatar";
 import { AppLink } from "../link";
+import { UserAvatar } from "./avatar";
 
 type ProfileCardProps = {
 	profile: ProfileViewDetailed;

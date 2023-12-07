@@ -1,7 +1,7 @@
 import * as persisted from "@/state/persisted";
 import { AtpPersistSessionHandler, BskyAgent } from "@atproto/api";
 import { atom } from "jotai";
-import { PersistedAccount, Did } from "../persisted/schema";
+import { Did, PersistedAccount } from "../persisted/schema";
 import { PUBLIC_BSKY_AGENT } from "../queries";
 
 let __currentAgent: BskyAgent = PUBLIC_BSKY_AGENT;
@@ -17,7 +17,7 @@ export type Session = {
 	currentAccount: PersistedAccount | undefined;
 };
 
-export const sessionAtom = atom < Session > ({
+export const sessionAtom = atom<Session>({
 	isInitialLoad: true,
 	isSwitchingAccounts: false,
 	accounts: [],
@@ -29,7 +29,7 @@ sessionAtom.onMount = (setAtom) => {
 		isInitialLoad: true,
 		isSwitchingAccounts: false,
 		accounts: persisted.get("session").accounts,
-		currentAccount: persisted.get('session').currentAccount,
+		currentAccount: persisted.get("session").currentAccount,
 	});
 };
 

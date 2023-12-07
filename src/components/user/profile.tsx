@@ -3,10 +3,10 @@ import { useProfilePosts, useProfileQuery } from "@/state/queries/profile";
 import { RichText as RichTextAPI } from "@atproto/api";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
+import { Post } from "../feed/post";
 import { RichText } from "../text";
 import { Button } from "../ui/button";
 import { UserAvatar } from "./avatar";
-import { Post } from "../feed/post";
 export function Profile() {
 	const { handleOrDid } = useParams();
 	const { isLoading, data: profile } = useProfileQuery({
@@ -33,7 +33,7 @@ export function Profile() {
 		!isLoading &&
 		profile && (
 			<section className="relative transition-all">
-				<div className="w-full h-32 expanded:h-96 transition-all overflow-hidden group shadow-lg" >
+				<div className="w-full h-32 expanded:h-96 transition-all overflow-hidden group shadow-lg">
 					<img
 						alt={profile.displayName ?? profile.handle}
 						className="object-cover w-full aspect-[4/1]"
@@ -69,7 +69,10 @@ export function Profile() {
 					</div>
 				</div>
 				<div className="mt-6 px-10">
-					<RichText className="text-zinc-500 text-right" richText={descriptionRT} />
+					<RichText
+						className="text-zinc-500 text-right"
+						richText={descriptionRT}
+					/>
 				</div>
 				<div className="mt-6 flex justify-center space-x-4">
 					<Button>Follow</Button>
