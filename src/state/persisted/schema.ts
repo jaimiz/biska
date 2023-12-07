@@ -30,6 +30,12 @@ const preferencesSchema = z.object({
 
 export type Preferences = z.infer<typeof preferencesSchema>;
 
+const appMetaSchema = z.object({
+	version: z.string().optional(),
+});
+
+export type AppMeta = z.infer<typeof appMetaSchema>;
+
 const columnSettingsSchema = z.object({
 	name: z.string(),
 });
@@ -54,6 +60,7 @@ export const AppSchema = z.object({
 	}),
 	preferences: preferencesSchema,
 	columns: z.array(columnSchema),
+	meta: appMetaSchema,
 });
 
 export type AppSchema = z.infer<typeof AppSchema>;
@@ -70,4 +77,7 @@ export const defaultAppSchema: AppSchema = {
 		},
 	},
 	columns: [],
+	meta: {
+		version: YABC_VERSION,
+	},
 };

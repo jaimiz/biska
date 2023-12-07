@@ -13,7 +13,7 @@ import { Link, Outlet } from "react-router-dom";
 export function RootRoute() {
 	return (
 		<div key="1" className="flex h-screen bg-gray-100 dark:bg-gray-900">
-			<div className="border-r w-80 bg-white dark:bg-gray-800 overflow-auto">
+			<div className="border-r w-80 bg-white dark:bg-gray-800 overflow-auto flex flex-col">
 				<CurrentUserCard />
 
 				<nav className="space-y-2 text-sm font-medium px-6">
@@ -68,6 +68,9 @@ export function RootRoute() {
 						<WrenchIcon />
 						Settings
 					</Link>
+					<span className="text-xs text-purple-300">
+						version {YABC_VERSION}
+					</span>
 				</div>
 			</div>
 
