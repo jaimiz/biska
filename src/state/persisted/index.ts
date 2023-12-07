@@ -8,6 +8,7 @@ export const stateStore = getDefaultStore();
 export async function init() {
 	try {
 		const stored = await store.read(); // check for new store
+		// TODO: check if app version has changed
 		if (!stored) await store.write(defaultAppSchema); // opt: init new store
 		stateStore.set(rootStateAtom, stored || defaultAppSchema);
 	} catch (e) {
