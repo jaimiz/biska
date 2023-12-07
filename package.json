@@ -41,7 +41,9 @@
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "husky": "8.0.3",
     "jotai-devtools": "0.7.0",
+    "lint-staged": "15.2.0",
     "postcss": "8.4.31",
     "tailwindcss": "3.3.5",
     "type-fest": "4.8.1",
@@ -50,5 +52,11 @@
     "vite-plugin-pwa": "0.16.7",
     "vite-plugin-rewrite-all": "1.0.2",
     "vite-tsconfig-paths": "4.2.1"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "biome lint",
+      "biome format --write"
+    ]
   }
 }
