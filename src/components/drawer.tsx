@@ -2,11 +2,7 @@ import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 import { ExpandIcon, ShrinkIcon } from "lucide-react";
 import { PropsWithChildren, useState } from "react";
-import {
-	useLocation,
-	useNavigate,
-	useParams,
-} from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ExpandOrShrinkLink } from "./link";
 import { Sheet, SheetContent } from "./ui/sheet";
 

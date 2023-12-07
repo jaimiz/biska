@@ -18,9 +18,8 @@ export function useProfileQuery({ did }: { did: Did | undefined }) {
 			return res.data;
 		},
 		enabled: !!did,
-	})
+	});
 }
-
 
 export type SkylineSliceItem = {
 	record: AppBskyFeedPost.Record;
@@ -52,7 +51,7 @@ export const useProfilePosts = (
 			const res = await getAgent().getAuthorFeed({
 				actor,
 				filter,
-				cursor: pageParam as string ?? undefined
+				cursor: (pageParam as string) ?? undefined,
 			});
 			const { cursor, feed } = res.data;
 			return { cursor, feed } as const;

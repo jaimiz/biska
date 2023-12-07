@@ -7,8 +7,8 @@ import { describeModerationCause } from "../moderation";
 // \u2714 = ✔
 // \u2611 = ☑
 const CHECK_MARKS_RE = /[\u2705\u2713\u2714\u2611]/gu;
-const CONTROL_CHARS_RE =
-	/[\u0000-\u001F\u007F-\u009F\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
+// biome-ignore format lint: we remove control chars from display names. format is disabled to avoid moving the regex to a new line
+const CONTROL_CHARS_RE = /[\u0000-\u001F\u007F-\u009F\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
 
 export function sanitizeDisplayName(
 	str: string,

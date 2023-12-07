@@ -1,8 +1,8 @@
+import { PersistedAccount } from "@/state/persisted/schema";
 import { useProfileQuery } from "@/state/queries/profile";
 import { currentAccountAtom } from "@/state/session";
 import { useAtomValue } from "jotai";
 import { ProfileCard } from "../user/profile-card";
-import { PersistedAccount } from "@/state/persisted/schema";
 
 export function CurrentUserCard() {
 	const currentAccount = useAtomValue(currentAccountAtom) as PersistedAccount;

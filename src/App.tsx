@@ -3,14 +3,14 @@ import { Provider as AtomProvider, getDefaultStore, useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { LoginScreen } from "./components/login-screen";
+import { Profile } from "./components/user/profile";
 import { queryClient } from "./lib/react-query";
 import { IndexRoute } from "./routes/guarded";
 import { RootRoute } from "./routes/guarded/root";
+import { TimeTickProvider } from "./state/app";
 import * as persisted from "./state/persisted";
 import { api, currentAccountAtom, sessionAtom } from "./state/session";
 import { Search } from "./routes/guarded/search";
-import { Profile } from "./components/user/profile";
-import { TimeTickProvider } from "./state/app";
 
 export function AppRouter() {
 	const router = createBrowserRouter([

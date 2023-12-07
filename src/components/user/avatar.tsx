@@ -1,8 +1,8 @@
-import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { getInitials } from "@/lib/strings";
-import { ClassValue } from "clsx";
 import { cn } from "@/lib/utils";
+import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import { ClassValue } from "clsx";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 type UserAvatarProps = {
 	className?: ClassValue;

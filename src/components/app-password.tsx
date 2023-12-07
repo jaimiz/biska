@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Copy, HelpCircle, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Button } from "./ui/button";
 import {
 	Sheet,
 	SheetClose,
@@ -9,8 +11,6 @@ import {
 	SheetTrigger,
 } from "./ui/sheet";
 import { TextButton } from "./ui/text-button";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { Button } from "./ui/button";
 type AppPasswordMiniGuideProps = {
 	Icon?: LucideIcon;
 };
