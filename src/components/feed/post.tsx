@@ -5,6 +5,10 @@ import {
 	AppBskyEmbedImages,
 	AppBskyEmbedRecord,
 	AppBskyEmbedRecordWithMedia,
+	AppBskyFeedDefs,
+	AppBskyFeedPost,
+	AppBskyGraphDefs,
+	AtUri,
 	RichText as RichTextAPI,
 } from "@atproto/api";
 import { ClassValue } from "clsx";
@@ -21,6 +25,8 @@ import { TimeElapsed } from "../text/time-elapsed";
 import { UserAvatar } from "../user/avatar";
 import { ProfileDisplayName } from "../user/profile-display-name";
 import { makeWrapper } from "../util/wrapper-factory";
+import { makeHandleLink } from "@/lib/strings/handle";
+import { AppLink } from "../link";
 
 type PostProps = SkylineSliceItem;
 export function Post({ post, record }: PostProps) {
@@ -40,14 +46,10 @@ export function Post({ post, record }: PostProps) {
 			<div>
 				<UserAvatar className="w-12 h-12" profile={post.author} />
 			</div>
-			<div className="flex-1">
+			<div className="flex flex-col flex-1 gap-2">
 				<div className="flex">
 					<ProfileDisplayName profile={post.author} />
-					<TimeElapsed timestamp={post.indexedAt}>
-						{({ timeElapsed }) => (
-							<span className="text-zinc-500"> &middot; {timeElapsed}</span>
-						)}
-					</TimeElapsed>
+					<TimeElapsed timestamp={post.indexedAt}>{TimeDisplay}</TimeElapsed>
 				</div>
 				<RichText richText={postText} />
 				{post.embed && <PostEmbed embed={post.embed} />}
@@ -57,6 +59,9 @@ export function Post({ post, record }: PostProps) {
 			</div>
 		</div>
 	);
+}
+function TimeDisplay({ timeElapsed }: { timeElapsed: string }) {
+	return <span className="text-zinc-500">&nbsp;&middot; {timeElapsed}</span>;
 }
 
 type ActionIconProps =
@@ -179,9 +184,44 @@ type PostEmbedProps = {
 };
 
 function PostEmbed({ embed }: PostEmbedProps) {
+	if (AppBskyEmbedRecordWithMedia.isView(embed)) {
+		return (
+			<div className="my-4 gap-4">
+				<PostEmbed embed={embed.media} />
+				<MaybeQuoteEmbed embed={embed.record} />
+			</div>
+		);
+	}
+
+	if (AppBskyEmbedRecord.isView(embed)) {
+		// custom feed embed (i.e. generator view)
+		// =
+		if (AppBskyFeedDefs.isGeneratorView(embed.record)) {
+			return "Feed Embed";
+			// return (
+			//   <FeedSourceCard
+			//     feedUri={embed.record.uri}
+			//     style={[pal.view, pal.border, styles.customFeedOuter]}
+			//     showLikes
+			//   />
+			// )
+		}
+
+		// list embed
+		if (AppBskyGraphDefs.isListView(embed.record)) {
+			return "List Embed";
+			// return <ListEmbed item={embed.record} />
+		}
+
+		// quote post
+		// =
+		return <MaybeQuoteEmbed embed={embed} />;
+	}
+
 	if (AppBskyEmbedImages.isView(embed)) {
 		return <EmbedImages images={embed.images} />;
 	}
+
 	return "Embed";
 }
 
@@ -206,7 +246,7 @@ function EmbedImages({ images }: EmbedImageProps) {
 					<div className="grid grid-cols-2 gap-1">
 						{images.map((image, index) => {
 							return (
-								<div className="aspect-square">
+								<div className="aspect-square" key={`gallery-thumb-${index}`}>
 									<GalleryImage
 										className={cn("rounded-none", borders[index])}
 										image={image}
@@ -278,5 +318,96 @@ function GalleryImage({ image, className }: GalleryImageProps) {
 			className={cn("object-cover w-full rounded-lg", className)}
 			src={thumb}
 		/>
+	);
+}
+
+type QuoteEmbedProps = {
+	quote: ComposerOptsQuote;
+};
+
+type ComposerOptsQuote = {
+	uri: string;
+	cid: string;
+	text: string;
+	indexedAt: string;
+	author: {
+		did: string;
+		handle: string;
+		displayName?: string;
+		avatar?: string;
+	};
+	embeds?: AppBskyEmbedRecord.ViewRecord["embeds"];
+};
+
+type MaybeQuoteEmbedProps = {
+	embed: AppBskyEmbedRecord.View;
+};
+function MaybeQuoteEmbed({ embed }: MaybeQuoteEmbedProps) {
+	console.log({ embed });
+	if (
+		AppBskyEmbedRecord.isViewRecord(embed.record) &&
+		AppBskyFeedPost.isRecord(embed.record.value) &&
+		AppBskyFeedPost.validateRecord(embed.record.value).success
+	) {
+		return (
+			<QuoteEmbed
+				quote={{
+					author: embed.record.author,
+					cid: embed.record.cid,
+					uri: embed.record.uri,
+					indexedAt: embed.record.indexedAt,
+					text: embed.record.value.text,
+					embeds: embed.record.embeds,
+				}}
+			/>
+		);
+	} else if (AppBskyEmbedRecord.isViewBlocked(embed.record)) {
+		return "Blocked";
+	} else if (AppBskyEmbedRecord.isViewNotFound(embed.record)) {
+		return "Deleted";
+	}
+	return null;
+}
+
+export function QuoteEmbed({ quote }: QuoteEmbedProps) {
+	const itemUrip = new AtUri(quote.uri);
+	const itemHref = makeHandleLink(quote.author, "post", itemUrip.rkey);
+	const itemTitle = `Post by ${quote.author.handle}`;
+	const isEmpty = useMemo(() => quote.text.trim().length === 0, [quote.text]);
+	const imagesEmbed = useMemo(
+		() =>
+			quote.embeds?.find(
+				(embed) =>
+					AppBskyEmbedImages.isView(embed) ||
+					AppBskyEmbedRecordWithMedia.isView(embed),
+			),
+		[quote.embeds],
+	);
+	const postText = useMemo(() => {
+		const rt = new RichTextAPI({
+			text: quote.text,
+		});
+		return rt;
+	}, [quote.text]);
+
+	return (
+		<AppLink
+			className="border flex p-2 rounded-lg flex-col"
+			to={itemHref}
+			title={itemTitle}
+		>
+			<div className="flex gap-2 items-center">
+				<UserAvatar profile={quote.author} className="w-4 h-4" />
+				<ProfileDisplayName profile={quote.author} />
+				<TimeElapsed timestamp={quote.indexedAt}>{TimeDisplay}</TimeElapsed>
+			</div>
+			{!isEmpty ? <RichText richText={postText} /> : null}
+			{AppBskyEmbedImages.isView(imagesEmbed) && (
+				<PostEmbed embed={imagesEmbed} />
+			)}
+			{AppBskyEmbedRecordWithMedia.isView(imagesEmbed) && (
+				<PostEmbed embed={imagesEmbed.media} />
+			)}
+		</AppLink>
 	);
 }

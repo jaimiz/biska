@@ -20,3 +20,17 @@ export function isInvalidHandle(handle: string): boolean {
 export function sanitizeHandle(handle: string, prefix = ""): string {
 	return isInvalidHandle(handle) ? "⚠Invalid Handle" : `${prefix}${handle}`;
 }
+
+export function makeHandleLink(
+	info: {
+		did: string;
+		handle: string;
+	},
+	...segments: string[]
+) {
+	return [
+		"/profile",
+		`${isInvalidHandle(info.handle) ? info.did : info.handle}`,
+		...segments,
+	].join("/");
+}
