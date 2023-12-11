@@ -1,3 +1,4 @@
+import { makeHandleLink } from "@/lib/strings/handle";
 import { cn } from "@/lib/utils";
 import { type SkylineSliceItem } from "@/state/queries/profile";
 import {
@@ -16,17 +17,18 @@ import {
 	MessageSquareDashedIcon,
 	MessageSquareIcon,
 	MessagesSquareIcon,
+	PlayCircleIcon,
 	Repeat2Icon,
 	StarIcon,
 } from "lucide-react";
-import { useMemo } from "react";
+import { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { ContainerLink } from "../link";
 import { RichText } from "../text";
 import { TimeElapsed } from "../text/time-elapsed";
 import { UserAvatar } from "../user/avatar";
 import { ProfileDisplayName } from "../user/profile-display-name";
 import { makeWrapper } from "../util/wrapper-factory";
-import { makeHandleLink } from "@/lib/strings/handle";
-import { AppLink } from "../link";
+import { SiSpotify } from "@icons-pack/react-simple-icons";
 
 type PostProps = SkylineSliceItem;
 export function Post({ post, record }: PostProps) {
@@ -46,12 +48,16 @@ export function Post({ post, record }: PostProps) {
 			<div>
 				<UserAvatar className="w-12 h-12" profile={post.author} />
 			</div>
-			<div className="flex flex-col flex-1 gap-2">
+			<div className="flex flex-col flex-1 gap-1 max-w-full overflow-hidden">
 				<div className="flex">
 					<ProfileDisplayName profile={post.author} />
-					<TimeElapsed timestamp={post.indexedAt}>{TimeDisplay}</TimeElapsed>
+					<PostLink post={post}>
+						<TimeElapsed timestamp={post.indexedAt}>
+							{PostTimestamp}
+						</TimeElapsed>
+					</PostLink>
 				</div>
-				<RichText richText={postText} />
+				{record.text ? <RichText richText={postText} /> : null}
 				{post.embed && <PostEmbed embed={post.embed} />}
 				<div className="flex justify-between">
 					<PostActions post={post} />
@@ -60,8 +66,21 @@ export function Post({ post, record }: PostProps) {
 		</div>
 	);
 }
-function TimeDisplay({ timeElapsed }: { timeElapsed: string }) {
+function PostTimestamp({ timeElapsed }: { timeElapsed: string }) {
 	return <span className="text-zinc-500">&nbsp;&middot; {timeElapsed}</span>;
+}
+
+type PostLinkProps = PropsWithChildren<{
+	post: PostProps["post"];
+}>;
+function PostLink({ post, children }: PostLinkProps) {
+	const [, , did, , rkey] = post.uri.split("/");
+	const postUrl = `https://bsky.app/profile/${did}/post/${rkey}`;
+	return (
+		<a target="_blank" rel="noreferrer noopener" href={postUrl}>
+			{children}
+		</a>
+	);
 }
 
 type ActionIconProps =
@@ -75,6 +94,25 @@ type ActionIconProps =
 			count: number;
 			active: boolean;
 	  };
+
+type ActionButtonProps = PropsWithChildren<{
+	type: ActionIconProps["icon"];
+}>;
+function ActionButton({ children, type }: ActionButtonProps) {
+	const colors: Record<ActionButtonProps["type"], string> = {
+		like: "hover:text-goldenrod-400",
+		repost: "hover:text-green-700",
+		reply: "hover:text-blue-500",
+	};
+	return (
+		<button
+			type="button"
+			className={`flex flex-0 items-center gap-x-1 text-base ${colors[type]}`}
+		>
+			{children}
+		</button>
+	);
+}
 function ActionIcon({ icon, count, active }: ActionIconProps) {
 	const Wrapper = makeWrapper("flex flex-1 items-center gap-x-1 text-base");
 	const IconClass = "w-4 h-4";
@@ -89,30 +127,25 @@ function ActionIcon({ icon, count, active }: ActionIconProps) {
 		);
 	};
 	switch (icon) {
-		case "reply":
-			if (count > 4) {
-				return (
-					<Wrapper>
-						<MessagesSquareIcon className={IconClass} /> {count}
-					</Wrapper>
-				);
-			}
-			if (count > 0 && count < 5) {
-				return (
-					<Wrapper>
-						<MessageSquareIcon className={IconClass} /> {count}{" "}
-					</Wrapper>
-				);
-			}
+		case "reply": {
+			const MessagesIcon =
+				count > 4
+					? MessagesSquareIcon
+					: count > 0
+					? MessageSquareIcon
+					: MessageSquareDashedIcon;
 			return (
-				<Wrapper>
-					<MessageSquareDashedIcon className={IconClass} /> {count}
-				</Wrapper>
+				<div className="flex flex-1">
+					<ActionButton type="reply">
+						<MessagesIcon className={IconClass} /> {count}
+					</ActionButton>
+				</div>
 			);
+		}
 		case "repost": {
 			return (
 				<Wrapper
-					className={cn("group", "cursor-pointer", {
+					className={cn({
 						"text-green-700": active,
 						"font-medium": active,
 						"hover:text-green-700": !active,
@@ -186,7 +219,7 @@ type PostEmbedProps = {
 function PostEmbed({ embed }: PostEmbedProps) {
 	if (AppBskyEmbedRecordWithMedia.isView(embed)) {
 		return (
-			<div className="my-4 gap-4">
+			<div className="flex flex-col gap-1">
 				<PostEmbed embed={embed.media} />
 				<MaybeQuoteEmbed embed={embed.record} />
 			</div>
@@ -222,7 +255,9 @@ function PostEmbed({ embed }: PostEmbedProps) {
 		return <EmbedImages images={embed.images} />;
 	}
 
-	return "Embed";
+	// External embeds
+
+	return <ExternalEmbed embed={embed} />;
 }
 
 type EmbedImageProps = {
@@ -230,8 +265,6 @@ type EmbedImageProps = {
 };
 function EmbedImages({ images }: EmbedImageProps) {
 	const count = images.length;
-
-	const GalleryWrapper = makeWrapper("my-2");
 
 	switch (count) {
 		case 4: {
@@ -242,66 +275,55 @@ function EmbedImages({ images }: EmbedImageProps) {
 				"rounded-br-lg",
 			];
 			return (
-				<GalleryWrapper>
-					<div className="grid grid-cols-2 gap-1">
-						{images.map((image, index) => {
-							return (
-								<div className="aspect-square" key={`gallery-thumb-${index}`}>
-									<GalleryImage
-										className={cn("rounded-none", borders[index])}
-										image={image}
-									/>{" "}
-								</div>
-							);
-						})}
-					</div>
-				</GalleryWrapper>
+				<div className="grid grid-cols-2 gap-1">
+					{images.map((image, index) => {
+						return (
+							<div className="aspect-square" key={`gallery-thumb-${index}`}>
+								<GalleryImage
+									className={cn("rounded-none", borders[index])}
+									image={image}
+								/>{" "}
+							</div>
+						);
+					})}
+				</div>
 			);
 		}
 		case 3: {
 			const [largeImage, topSmall, bottomSmall] = images;
 			return (
-				<GalleryWrapper>
-					<div className="flex flex-row flex-nowrap gap-1">
-						<div className="flex flex-[2]">
-							<GalleryImage className="rounded-r-none" image={largeImage} />
-						</div>
-						<div className="flex flex-1 flex-col gap-1">
-							<GalleryImage
-								className="rounded-none rounded-tr-lg"
-								image={topSmall}
-							/>
-							<GalleryImage
-								className="rounded-none rounded-br-lg"
-								image={bottomSmall}
-							/>
-						</div>
+				<div className="flex flex-row flex-nowrap gap-1">
+					<div className="flex flex-[2]">
+						<GalleryImage className="rounded-r-none" image={largeImage} />
 					</div>
-				</GalleryWrapper>
+					<div className="flex flex-1 flex-col gap-1">
+						<GalleryImage
+							className="rounded-none rounded-tr-lg"
+							image={topSmall}
+						/>
+						<GalleryImage
+							className="rounded-none rounded-br-lg"
+							image={bottomSmall}
+						/>
+					</div>
+				</div>
 			);
 		}
 		case 2: {
 			const [first, second] = images;
 			return (
-				<GalleryWrapper>
-					{" "}
-					<div className="flex gap-1 my-4">
-						<div className="flex-1 aspect-square">
-							<GalleryImage className="rounded-r-none" image={first} />{" "}
-						</div>
-						<div className="flex-1 aspect-square">
-							<GalleryImage className="rounded-l-none" image={second} />{" "}
-						</div>
+				<div className="flex gap-1 my-4">
+					<div className="flex-1 aspect-square">
+						<GalleryImage className="rounded-r-none" image={first} />{" "}
 					</div>
-				</GalleryWrapper>
+					<div className="flex-1 aspect-square">
+						<GalleryImage className="rounded-l-none" image={second} />{" "}
+					</div>
+				</div>
 			);
 		}
 		default: {
-			return (
-				<GalleryWrapper>
-					<GalleryImage image={images[0]} />
-				</GalleryWrapper>
-			);
+			return <GalleryImage image={images[0]} />;
 		}
 	}
 }
@@ -343,7 +365,6 @@ type MaybeQuoteEmbedProps = {
 	embed: AppBskyEmbedRecord.View;
 };
 function MaybeQuoteEmbed({ embed }: MaybeQuoteEmbedProps) {
-	console.log({ embed });
 	if (
 		AppBskyEmbedRecord.isViewRecord(embed.record) &&
 		AppBskyFeedPost.isRecord(embed.record.value) &&
@@ -369,7 +390,7 @@ function MaybeQuoteEmbed({ embed }: MaybeQuoteEmbedProps) {
 	return null;
 }
 
-export function QuoteEmbed({ quote }: QuoteEmbedProps) {
+function QuoteEmbed({ quote }: QuoteEmbedProps) {
 	const itemUrip = new AtUri(quote.uri);
 	const itemHref = makeHandleLink(quote.author, "post", itemUrip.rkey);
 	const itemTitle = `Post by ${quote.author.handle}`;
@@ -391,15 +412,15 @@ export function QuoteEmbed({ quote }: QuoteEmbedProps) {
 	}, [quote.text]);
 
 	return (
-		<AppLink
+		<ContainerLink
 			className="border flex p-2 rounded-lg flex-col"
 			to={itemHref}
 			title={itemTitle}
 		>
-			<div className="flex gap-2 items-center">
+			<div className="flex gap-1 items-center">
 				<UserAvatar profile={quote.author} className="w-4 h-4" />
-				<ProfileDisplayName profile={quote.author} />
-				<TimeElapsed timestamp={quote.indexedAt}>{TimeDisplay}</TimeElapsed>
+				<ProfileDisplayName className="max-w-[80%]" profile={quote.author} />
+				<TimeElapsed timestamp={quote.indexedAt}>{PostTimestamp}</TimeElapsed>
 			</div>
 			{!isEmpty ? <RichText richText={postText} /> : null}
 			{AppBskyEmbedImages.isView(imagesEmbed) && (
@@ -408,6 +429,111 @@ export function QuoteEmbed({ quote }: QuoteEmbedProps) {
 			{AppBskyEmbedRecordWithMedia.isView(imagesEmbed) && (
 				<PostEmbed embed={imagesEmbed.media} />
 			)}
-		</AppLink>
+		</ContainerLink>
+	);
+}
+
+type ExternalEmbedProps = {
+	embed: PostEmbedProps["embed"];
+};
+function ExternalEmbed({ embed }: ExternalEmbedProps) {
+	if (AppBskyEmbedExternal.isView(embed)) {
+		if (domainMatch("open.spotify.com", new URL(embed.external.uri))) {
+			return <SpotifyExternalEmbed embed={embed} />;
+		}
+		return <GenericExternalEmbed embed={embed} />;
+	}
+	return null;
+}
+
+function domainMatch(domain: string, uri: URL) {
+	return uri.host.includes(domain);
+}
+
+type EmbedViewProps = { embed: AppBskyEmbedExternal.View };
+
+function GenericExternalEmbed({ embed }: EmbedViewProps) {
+	const { hostname: embedDomain } = new URL(embed.external.uri);
+	return (
+		<a href={embed.external.uri} target="_blank" rel="noopener noreferrer">
+			<div className="flex gap-3 rounded-md overflow-hidden border">
+				{embed.external.thumb && (
+					<div className="max-w-full flex-1 aspect-square">
+						<img
+							className="object-cover w-full h-full"
+							src={embed.external.thumb}
+							alt={embed.external.title}
+						/>
+					</div>
+				)}
+				<div className="meta flex-[3] gap-2 flex flex-col p-2">
+					<div className="text-xs text-muted-foreground">{embedDomain}</div>
+					<div className="font-semibold">{embed.external.title}</div>
+					<div className="font-light text-xs">{embed.external.description}</div>
+				</div>
+			</div>
+		</a>
+	);
+}
+
+function SpotifyExternalEmbed({ embed }: EmbedViewProps) {
+	const { uri } = embed.external;
+	const oEmbedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(
+		uri,
+	)}`;
+
+	const [oembed, setOembed] = useState(<StaticSpotifyEmbed embed={embed} />);
+	useEffect(() => {
+		async function fetchOembedData() {
+			console.log(`fetching ${oEmbedUrl}`);
+			const response = await fetch(oEmbedUrl);
+			if (response.status === 200) {
+				const data = await response.json();
+				if (
+					domainMatch("open.spotify.com", new URL(data.iframe_url)) &&
+					data.html.includes(data.iframe_url)
+				) {
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+					return <div dangerouslySetInnerHTML={{ __html: data.html }} />;
+				}
+				return <StaticSpotifyEmbed embed={embed} />;
+			}
+			return <StaticSpotifyEmbed embed={embed} />;
+		}
+		fetchOembedData().then((data) => {
+			setOembed(data);
+		});
+	}, [oEmbedUrl, embed]);
+	return oembed;
+}
+
+function StaticSpotifyEmbed({ embed }: EmbedViewProps) {
+	return (
+		<a href={embed.external.uri} target="_blank" rel="noopener noreferrer">
+			<div className="flex gap-3 rounded-2xl overflow-hidden border bg-[#1db954] text-white">
+				<div className="max-w-full flex-1">
+					<img src={embed.external.thumb} alt={embed.external.title} />
+				</div>
+				<div className="meta flex-[3] gap-2 flex p-2">
+					<div className="flex flex-col flex-grow justify-around">
+						<div>
+							<div className="font-semibold text-sm">
+								{embed.external.title}
+							</div>
+							<div className="font-light text-xs">
+								{embed.external.description}
+							</div>
+						</div>
+						<div className="text-sm flex gap-2 items-center">
+							<PlayCircleIcon />
+							Play on Spotify
+						</div>
+					</div>
+					<div>
+						<SiSpotify size={24} />
+					</div>
+				</div>
+			</div>
+		</a>
 	);
 }
