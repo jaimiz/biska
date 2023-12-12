@@ -6,10 +6,11 @@ import { cn } from "@/lib/utils";
 type ProfileDisplayNameProps = {
 	profile: ProfileViewDetailed;
 	className?: ClassValue;
+	showUsername?: boolean;
 };
 
 export function ProfileDisplayName(props: ProfileDisplayNameProps) {
-	const { profile, className } = props;
+	const { profile, className, showUsername = true } = props;
 	return (
 		<AppLink
 			to={`/profile/${profile.handle}`}
@@ -21,10 +22,12 @@ export function ProfileDisplayName(props: ProfileDisplayNameProps) {
 			{profile.displayName ? (
 				<div className="font-medium">{`${profile.displayName}`}</div>
 			) : null}
-			<div className="text-zinc-500 dark:text-zinc-400 text-ellipsis overflow-hidden">
-				{" "}
-				@{profile.handle}
-			</div>
+			{(showUsername || !profile.displayName) && (
+				<div className="text-zinc-500 dark:text-zinc-400 text-ellipsis overflow-hidden">
+					{" "}
+					@{profile.handle}
+				</div>
+			)}
 		</AppLink>
 	);
 }

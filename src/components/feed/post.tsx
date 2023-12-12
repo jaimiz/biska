@@ -1,6 +1,9 @@
 import { makeHandleLink } from "@/lib/strings/handle";
 import { cn } from "@/lib/utils";
-import { type SkylineSliceItem } from "@/state/queries/profile";
+import {
+	useProfileQuery,
+	type SkylineSliceItem,
+} from "@/state/queries/profile";
 import {
 	AppBskyEmbedExternal,
 	AppBskyEmbedImages,
@@ -19,6 +22,7 @@ import {
 	MessagesSquareIcon,
 	PlayCircleIcon,
 	Repeat2Icon,
+	ReplyIcon,
 	StarIcon,
 } from "lucide-react";
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
@@ -29,6 +33,7 @@ import { UserAvatar } from "../user/avatar";
 import { ProfileDisplayName } from "../user/profile-display-name";
 import { makeWrapper } from "../util/wrapper-factory";
 import { SiSpotify } from "@icons-pack/react-simple-icons";
+import { Did } from "@/state/persisted/schema";
 
 type PostProps = SkylineSliceItem;
 export function Post({ post, record }: PostProps) {
@@ -57,6 +62,7 @@ export function Post({ post, record }: PostProps) {
 						</TimeElapsed>
 					</PostLink>
 				</div>
+				{record.reply && <ReplyMeta reply={record.reply} />}
 				{record.text ? <RichText richText={postText} /> : null}
 				{post.embed && <PostEmbed embed={post.embed} />}
 				<div className="flex justify-between">
@@ -65,6 +71,22 @@ export function Post({ post, record }: PostProps) {
 			</div>
 		</div>
 	);
+}
+
+function ReplyMeta({ reply }: { reply: AppBskyFeedPost.ReplyRef }) {
+	const [, , repo] = reply.parent.uri.split("/");
+	const { data: replyAuthor, isSuccess } = useProfileQuery({
+		did: repo as Did,
+	});
+	if (isSuccess) {
+		return (
+			<div className="flex items-center gap-1 text-muted-foreground text-xs">
+				<ReplyIcon className="w-3" /> respondendo para{" "}
+				<ProfileDisplayName showUsername={false} profile={replyAuthor} />
+			</div>
+		);
+	}
+	return "...";
 }
 function PostTimestamp({ timeElapsed }: { timeElapsed: string }) {
 	return <span className="text-zinc-500">&nbsp;&middot; {timeElapsed}</span>;

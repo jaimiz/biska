@@ -7,6 +7,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { Did } from "../persisted/schema";
 import { getAgent } from "../session";
+import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 
 export const RQKEY = (did?: Did) => ["profile", did ?? ""];
 
@@ -15,7 +16,7 @@ export function useProfileQuery({ did }: { did: Did | undefined }) {
 		queryKey: RQKEY(did),
 		queryFn: async () => {
 			const res = await getAgent().getProfile({ actor: did ?? "" });
-			return res.data;
+			return res.data as ProfileViewDetailed;
 		},
 		enabled: !!did,
 	});
@@ -27,7 +28,7 @@ export type SkylineSliceItem = {
 	reason: AppBskyFeedDefs.ReasonRepost;
 };
 
-type AuthorFeedFilters = AppBskyFeedGetAuthorFeed.QueryParams["filter"];
+export type AuthorFeedFilters = AppBskyFeedGetAuthorFeed.QueryParams["filter"];
 
 export const useProfilePosts = (
 	handle?: string,
