@@ -4,10 +4,7 @@ import {
 	useProfilePosts,
 	useProfileQuery,
 } from "@/state/queries/profile";
-import {
-	AppBskyFeedGetAuthorFeed,
-	RichText as RichTextAPI,
-} from "@atproto/api";
+import { RichText as RichTextAPI } from "@atproto/api";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Post } from "../feed/post";

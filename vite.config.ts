@@ -6,6 +6,7 @@ import eslintPlugin from "@nabla/vite-plugin-eslint";
 import jotaiDebugLabel from "jotai/babel/plugin-debug-label";
 import jotaiReactRefresh from "jotai/babel/plugin-react-refresh";
 import pluginRewriteAll from "vite-plugin-rewrite-all";
+import checkerPlugin from "vite-plugin-checker";
 
 const vercelEnv = process.env.VERCEL_ENV ?? false;
 const isProduction = vercelEnv
@@ -60,5 +61,8 @@ export default defineConfig({
 		}),
 		VitePWA({ registerType: "autoUpdate" }),
 		eslintPlugin(),
+		checkerPlugin({
+			typescript: true
+		})
 	],
 });
