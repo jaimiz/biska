@@ -4,13 +4,17 @@ import {
 	useProfilePosts,
 	useProfileQuery,
 } from "@/state/queries/profile";
-import { RichText as RichTextAPI } from "@atproto/api";
+import {
+	AppBskyFeedGetAuthorFeed,
+	RichText as RichTextAPI,
+} from "@atproto/api";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Post } from "../feed/post";
 import { RichText } from "../text";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { UserAvatar } from "./avatar";
+import { isBlockedByError, isBlockingError } from "@/lib/errors";
 
 export function Profile() {
 	const { handleOrDid } = useParams();
@@ -24,26 +28,26 @@ export function Profile() {
 	}, [profile]);
 
 	if (isLoading) {
-		return "Loading";
+		return "Carregando…";
 	}
 	if (!isLoading && !profile) {
-		return "Error";
+		return "Erro ao carregar o perfil";
 	}
 
 	return (
 		!isLoading &&
 		profile && (
 			<section className="relative transition-all">
-				<div className="w-full h-32 expanded:h-96 transition-all overflow-hidden group shadow-lg">
+				<div className="w-full h-min transition-all overflow-hidden group shadow-lg">
 					<img
 						alt={profile.displayName ?? profile.handle}
-						className="object-cover w-full aspect-[4/1]"
+						className="object-cover w-full"
 						src={profile.banner}
 					/>
 				</div>
 				<div className="absolute transform -translate-y-1/2 w-full flex justify-end transition-all px-10">
 					<UserAvatar
-						className="w-24 h-24 border-4 border-white shadow-lg text-4xl expanded:w-32 expanded:h-32"
+						className="w-24 h-24 border-4 border-white shadow-lg text-4xl expanded:w-32 expanded:h-32 transition-all"
 						profile={profile}
 					/>
 				</div>
@@ -108,10 +112,13 @@ function PostsTab({
 	// End Load user posts
 
 	if (timelineQuery.status === "pending") {
-		return "Loading posts";
+		return "Carregando posts…";
 	}
 	if (timelineQuery.status === "error") {
-		return "Error loading posts";
+		if (isBlockingError(timelineQuery.error))
+			return "Você bloqueou esse usuário";
+		if (isBlockedByError(timelineQuery.error)) return "Você está bloqueado";
+		return "Erro ao carregar posts";
 	}
 	return timelineData.map((timelineEntry) => {
 		return (

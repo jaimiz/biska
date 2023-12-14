@@ -84,8 +84,5 @@ module.exports = {
 	},
 	plugins: [
 		require("tailwindcss-animate"),
-		plugin(function({ addVariant }) {
-			addVariant("expanded", ".is-expanded &");
-		}),
 	],
 };

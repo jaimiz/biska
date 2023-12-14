@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { Did } from "../persisted/schema";
 import { getAgent } from "../session";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import { isBlockedByError, isBlockingError } from "@/lib/errors";
 
 export const RQKEY = (did?: Did) => ["profile", did ?? ""];
 
@@ -56,6 +57,13 @@ export const useProfilePosts = (
 			});
 			const { cursor, feed } = res.data;
 			return { cursor, feed } as const;
+		},
+		retry: (count, error) => {
+			if (isBlockedByError(error) || isBlockingError(error)) {
+				return false;
+			}
+
+			return count < 2;
 		},
 	});
 
