@@ -9,8 +9,9 @@ import { RootRoute } from "./routes/guarded/root";
 import * as persisted from "./state/persisted";
 import { api, currentAccountAtom, sessionAtom } from "./state/session";
 import { ProfileSheet } from "./components/user/ProfileSheet";
+import { Search } from "./routes/guarded/search";
 
-function AppRouter() {
+export function AppRouter() {
 	const router = createBrowserRouter([
 		{
 			path: "/",
@@ -49,7 +50,11 @@ function AppLogin() {
 	 * Session and initial state should be loaded prior to rendering below.
 	 */
 
-	return currentAccount ? <AppRouter /> : <LoginScreen />;
+	const SearchRouter = createBrowserRouter([
+		{path : "/", element: <Search />}
+	])
+
+	return currentAccount ? <RouterProvider router={SearchRouter} /> : <LoginScreen />;
 }
 
 function App() {
