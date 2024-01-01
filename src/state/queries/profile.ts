@@ -26,7 +26,7 @@ export function useProfileQuery({ did }: { did: Did | undefined }) {
 export type SkylineSliceItem = {
 	record: AppBskyFeedPost.Record;
 	post: AppBskyFeedDefs.PostView;
-	reason: AppBskyFeedDefs.ReasonRepost;
+	reason?: AppBskyFeedDefs.ReasonRepost;
 };
 
 export type AuthorFeedFilters = AppBskyFeedGetAuthorFeed.QueryParams["filter"];

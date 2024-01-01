@@ -7,7 +7,10 @@ import {
 
 type LinkProps = RouterLinkProps & RefAttributes<HTMLAnchorElement>;
 export function AppLink(props: LinkProps) {
-	return <RouterLink {...props} />;
+	const bskyLink = props.to?.toString().startsWith("http")
+		? props.to
+		: `https://bsky.app${props.to}`;
+	return <RouterLink {...props} to={bskyLink} target="_blank" />;
 }
 
 export function ContainerLink({ children, className, ...rest }: LinkProps) {

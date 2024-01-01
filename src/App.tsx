@@ -53,7 +53,6 @@ function AppLogin() {
 	/*
 	 * Session and initial state should be loaded prior to rendering below.
 	 */
-
 	return currentAccount ? <AppRouter /> : <LoginScreen />;
 }
 
