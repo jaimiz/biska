@@ -56,10 +56,14 @@ function AppLogin() {
 	 */
 
 	const SearchRouter = createBrowserRouter([
-		{path : "/", element: <Search />}
-	])
+		{ path: "/", element: <Search /> },
+	]);
 
-	return currentAccount ? <RouterProvider router={SearchRouter} /> : <LoginScreen />;
+	return currentAccount ? (
+		<RouterProvider router={SearchRouter} />
+	) : (
+		<LoginScreen />
+	);
 }
 
 function App() {
