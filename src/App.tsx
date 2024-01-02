@@ -10,6 +10,7 @@ import { RootRoute } from "./routes/guarded/root";
 import { TimeTickProvider } from "./state/app";
 import * as persisted from "./state/persisted";
 import { api, currentAccountAtom, sessionAtom } from "./state/session";
+import { Search } from "./routes/guarded/search";
 
 function AppRouter() {
 	const router = createBrowserRouter([
@@ -26,6 +27,10 @@ function AppRouter() {
 							Component: Profile,
 						},
 					],
+				},
+				{
+					path: "/search",
+					element: <Search />,
 				},
 			],
 		},

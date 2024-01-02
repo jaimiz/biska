@@ -6,6 +6,11 @@ import {
 } from "react-router-dom";
 
 type LinkProps = RouterLinkProps & RefAttributes<HTMLAnchorElement>;
+
+export function NavLink(props: LinkProps) {
+	return <RouterLink {...props} />;
+}
+
 export function AppLink(props: LinkProps) {
 	const bskyLink = props.to?.toString().startsWith("http")
 		? props.to
