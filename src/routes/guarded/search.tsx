@@ -1,5 +1,6 @@
+import { AutocompleteUsers } from "@/components/autocomplete";
 import { Post } from "@/components/feed/post";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ProfileDisplayName } from "@/components/user/profile-display-name";
 import { useProfileQuery } from "@/state/queries/profile";
 import { useSearchPostsQuery } from "@/state/queries/search";
@@ -33,7 +34,8 @@ export function Search() {
 	const currentUserProfile = useProfileQuery({ did: currentUser?.did });
 	const [search, setSearch] = useState("");
 	const [query, setQuery] = useState("");
-	const [searchMine, setSearchMine] = useState(false);
+	const [searchType, setSearchType] = useState<"all" | "me" | "user">("all");
+	const [userToSearch, setUserToSearch] = useState("");
 	if (!currentUserProfile.data) {
 		return null;
 	}
@@ -68,8 +70,12 @@ export function Search() {
 				<button
 					type="submit"
 					onClick={() => {
-						if (searchMine && search !== "") {
+						if (searchType === "me" && search !== "") {
 							setQuery(`${search} from:${currentUserProfile.data.handle}`);
+							return;
+						}
+						if (searchType === "user" && search !== "" && userToSearch !== "") {
+							setQuery(`${search} from:${userToSearch}`);
 							return;
 						}
 						setQuery(search);
@@ -78,16 +84,37 @@ export function Search() {
 					Buscar
 				</button>
 			</div>
-			<div className="flex items-center gap-x-2">
-				<Checkbox
-					checked={searchMine}
-					onCheckedChange={(e) => {
-						setSearchMine(e !== false);
-					}}
-					id="search-my-posts"
-				/>
-				<label htmlFor="search-my-posts">Buscar nos meus posts</label>
-			</div>
+			<RadioGroup
+				onValueChange={(e: "all" | "me" | "user") => {
+					setSearchType(e);
+				}}
+			>
+				<div className="flex items-center gap-x-2">
+					<RadioGroupItem
+						checked={searchType === "all"}
+						value="all"
+						id="search-all-posts"
+					/>
+					<label htmlFor="search-all-posts">Buscar todos os posts</label>|
+					<RadioGroupItem
+						checked={searchType === "me"}
+						value="me"
+						id="search-my-posts"
+					/>
+					<label htmlFor="search-my-posts">Buscar nos meus posts</label>|
+					<RadioGroupItem
+						checked={searchType === "user"}
+						value="user"
+						id="search-user-posts"
+					/>
+					<label htmlFor="search-user-posts">Buscar nos posts do usuário</label>
+					<AutocompleteUsers
+						onSelect={(e: string) => {
+							setUserToSearch(e);
+						}}
+					/>
+				</div>
+			</RadioGroup>
 			{query ? (
 				<div className="max-w-[600px]">
 					<SearchResults query={query} />
@@ -95,6 +122,9 @@ export function Search() {
 			) : (
 				""
 			)}
+			<div className="flex self-center mt-auto text-xs text-purple-300">
+				versão {YABC_VERSION}
+			</div>
 		</div>
 	);
 }
