@@ -25,9 +25,6 @@ const productionVersion = isProduction
 
 const getVersion = async () => {
 	if (vercelEnv) {
-		if (isProduction) {
-			return process.env.npm_package_version;
-		}
 		return vercelPreviewVersion;
 	}
 	if (isProduction) {
