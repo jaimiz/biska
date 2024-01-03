@@ -1,7 +1,8 @@
 import { AutocompleteUsers } from "@/components/autocomplete";
 import { Post } from "@/components/feed/post";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileDisplayName } from "@/components/user/profile-display-name";
 import { useProfileQuery } from "@/state/queries/profile";
 import { useSearchPostsQuery } from "@/state/queries/search";
@@ -10,7 +11,7 @@ import { AppBskyFeedPost } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { useAtomValue } from "jotai";
 import { RadarIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
@@ -76,38 +77,41 @@ export function Search() {
 	const [query, setQuery] = useState("");
 	const [searchType, setSearchType] = useState<"all" | "me" | "user">("all");
 	const [userToSearch, setUserToSearch] = useState("");
+	const isClearingUser = useRef(false);
+
 	if (!currentUserProfile.data) {
 		return null;
 	}
 	return (
 		<div className="flex flex-col items-center w-full justify-start pt-4 h-screen overflow-auto bg-gray-100 dark:bg-gray-900">
-			<div>
-				<h2>YABC - Busca</h2>
+			<div className="flex justify-between w-full max-w-[1000px] my-6 m-auto">
+				<h2 className="text-3xl">YABC - Busca</h2>
 				<div>
 					Logado como{" "}
 					<ProfileDisplayName
 						className="inline-flex"
 						profile={currentUserProfile.data as ProfileViewDetailed}
 					/>{" "}
-					-{" "}
+					&middot;{" "}
 					<button
 						type="button"
 						onClick={() => {
 							api.logout();
 						}}
+						className="text-sm text-purple-400"
 					>
 						Sair
 					</button>
 				</div>
 			</div>
-			<div className="flex justify-center items-center gap-x-4">
-				<input
+			<div className="flex w-full max-w-[1000px] justify-center items-center gap-x-4">
+				<Input
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					type="search"
 					placeholder="Buscar no Bluesky"
 				/>{" "}
-				<button
+				<Button
 					type="submit"
 					onClick={() => {
 						if (searchType === "me" && search !== "") {
@@ -122,39 +126,52 @@ export function Search() {
 					}}
 				>
 					Buscar
-				</button>
+				</Button>
 			</div>
-			<RadioGroup
-				onValueChange={(e: "all" | "me" | "user") => {
-					setSearchType(e);
+			<Tabs
+				value={searchType}
+				className="flex items-center my-2 mx-0"
+				onValueChange={(value) => {
+					if (!isClearingUser.current) {
+						setSearchType(value as "all" | "me" | "user");
+						return;
+					}
+					isClearingUser.current = false;
 				}}
 			>
-				<div className="flex items-center gap-x-2">
-					<RadioGroupItem
-						checked={searchType === "all"}
+				<TabsList className="h-auto items-stretch gap-x-2">
+					<TabsTrigger
+						className="data-[state=active]:bg-purple-300"
 						value="all"
-						id="search-all-posts"
-					/>
-					<label htmlFor="search-all-posts">Buscar todos os posts</label>|
-					<RadioGroupItem
-						checked={searchType === "me"}
-						value="me"
-						id="search-my-posts"
-					/>
-					<label htmlFor="search-my-posts">Buscar nos meus posts</label>|
-					<RadioGroupItem
-						checked={searchType === "user"}
+					>
+						Buscar em todos os posts
+					</TabsTrigger>
+					<TabsTrigger className="data-[state=active]:bg-purple-300" value="me">
+						Buscar somente nos meus posts
+					</TabsTrigger>
+					<TabsTrigger
+						asChild
+						className="data-[state=active]:bg-purple-300"
 						value="user"
-						id="search-user-posts"
-					/>
-					<label htmlFor="search-user-posts">Buscar nos posts do usuário</label>
-					<AutocompleteUsers
-						onSelect={(e: string) => {
-							setUserToSearch(e);
-						}}
-					/>
-				</div>
-			</RadioGroup>
+					>
+						<div className="gap-x-2 cursor-pointer">
+							Buscar nos posts do usuário{" "}
+							<AutocompleteUsers
+								onSelect={(e: string) => {
+									setUserToSearch(e);
+									if (e === "") {
+										setSearchType("all");
+										isClearingUser.current = true;
+									} else {
+										setSearchType("user");
+									}
+								}}
+							/>
+						</div>
+					</TabsTrigger>
+				</TabsList>
+			</Tabs>
+
 			{query ? (
 				<div className="max-w-[600px]">
 					<SearchResults query={query} />

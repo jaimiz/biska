@@ -78,10 +78,10 @@ export function AutocompleteUsers(props: AutocompleteProps) {
 								key={option.value}
 								value={option.value}
 								onSelect={(currentValue) => {
-									if (props.onSelect) {
-										props.onSelect(currentValue);
-									}
 									setValue(currentValue === value ? "" : currentValue);
+									if (props.onSelect) {
+										props.onSelect(currentValue === value ? "" : currentValue);
+									}
 									setOpen(false);
 								}}
 							>
