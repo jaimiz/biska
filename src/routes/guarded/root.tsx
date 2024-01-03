@@ -1,3 +1,4 @@
+import { NavLink } from "@/components/link";
 import { CurrentUserCard } from "@/components/session/current-user-card";
 import {
 	BellIcon,
@@ -24,13 +25,13 @@ export function RootRoute() {
 						<HomeIcon />
 						Home
 					</Link>
-					<a
+					<NavLink
 						className="flex items-center gap-3 px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 rounded-lg"
-						href="?search"
+						to="/search"
 					>
 						<SearchIcon />
 						Search
-					</a>
+					</NavLink>
 					<a
 						className="flex items-center gap-3 px-2 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 rounded-lg"
 						href="?feeds"
