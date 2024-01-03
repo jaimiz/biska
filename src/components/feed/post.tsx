@@ -48,7 +48,7 @@ export function Post({ post, record }: PostProps) {
 	return (
 		<div
 			key={post.cid}
-			className="flex text border-primary border-solid border-y-2 -mt-[2px] py-4 px-2 gap-x-4"
+			className="first:border-t-0 last:border-b-0 flex text border-purple-200 border-solid border-y py-4 px-2 gap-x-4"
 		>
 			<div>
 				<UserAvatar className="w-12 h-12" profile={post.author} />

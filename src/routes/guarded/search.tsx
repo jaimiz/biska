@@ -1,5 +1,6 @@
 import { AutocompleteUsers } from "@/components/autocomplete";
 import { Post } from "@/components/feed/post";
+import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ProfileDisplayName } from "@/components/user/profile-display-name";
 import { useProfileQuery } from "@/state/queries/profile";
@@ -8,10 +9,12 @@ import { api, currentAccountAtom } from "@/state/session";
 import { AppBskyFeedPost } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { useAtomValue } from "jotai";
+import { RadarIcon } from "lucide-react";
 import { useState } from "react";
 
 function SearchResults({ query }: { query: string }) {
-	const { data, isLoading, isError } = useSearchPostsQuery({ query });
+	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
+		useSearchPostsQuery({ query });
 	if (!data) {
 		return null;
 	}
@@ -26,7 +29,44 @@ function SearchResults({ query }: { query: string }) {
 		);
 	});
 
-	return isLoading ? "Buscando…" : isError ? "Erro" : posts;
+	return isLoading ? (
+		"Buscando…"
+	) : isError ? (
+		"Erro"
+	) : (
+		<div className="flex flex-col items-center gap-4">
+			<div>{posts}</div>
+			{hasNextPage && (
+				<div>
+					<Button
+						disabled={isFetching}
+						className="gap-2"
+						onClick={() => {
+							if (!isFetching) {
+								fetchNextPage();
+							}
+						}}
+					>
+						{isFetching ? (
+							<>
+								<RadarIcon className="animate-spin text-purple-100" />{" "}
+								Carregando…
+							</>
+						) : (
+							"Carregar mais posts"
+						)}
+					</Button>
+				</div>
+			)}
+			{!hasNextPage && (
+				<div className="w-full relative flex py-5 px-32 items-center text-purple-300">
+					<div className="flex-grow border-t border-current" />
+					<span className="flex-shrink mx-2 text-current">fim</span>
+					<div className="flex-grow border-t border-current" />
+				</div>
+			)}
+		</div>
+	);
 }
 
 export function Search() {
