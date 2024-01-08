@@ -7,7 +7,7 @@ import { Profile } from "./components/user/profile";
 import { queryClient } from "./lib/react-query";
 import { IndexRoute } from "./routes/guarded";
 import { RootRoute } from "./routes/guarded/root";
-import { TimeTickProvider } from "./state/app";
+import { TimeTickProvider } from "./state/clock";
 import * as persisted from "./state/persisted";
 import { api, currentAccountAtom, sessionAtom } from "./state/session";
 import { Search } from "./routes/guarded/search";

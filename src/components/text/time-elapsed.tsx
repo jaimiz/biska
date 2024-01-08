@@ -1,5 +1,5 @@
 import { ago } from "@/lib/strings/time";
-import { useTickEveryMinute } from "@/state/app";
+import { useTickEveryMinute } from "@/state/clock";
 import { useEffect, useState } from "react";
 
 export function TimeElapsed({

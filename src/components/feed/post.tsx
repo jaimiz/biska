@@ -1,5 +1,6 @@
 import { makeHandleLink } from "@/lib/strings/handle";
 import { cn } from "@/lib/utils";
+import { Did } from "@/state/persisted/schema";
 import {
 	useProfileQuery,
 	type SkylineSliceItem,
@@ -15,25 +16,16 @@ import {
 	AtUri,
 	RichText as RichTextAPI,
 } from "@atproto/api";
+import { SiSpotify } from "@icons-pack/react-simple-icons";
 import { ClassValue } from "clsx";
-import {
-	MessageSquareDashedIcon,
-	MessageSquareIcon,
-	MessagesSquareIcon,
-	PlayCircleIcon,
-	Repeat2Icon,
-	ReplyIcon,
-	StarIcon,
-} from "lucide-react";
+import { PlayCircleIcon, ReplyIcon } from "lucide-react";
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import { ContainerLink } from "../link";
 import { RichText } from "../text";
 import { TimeElapsed } from "../text/time-elapsed";
 import { UserAvatar } from "../user/avatar";
 import { ProfileDisplayName } from "../user/profile-display-name";
-import { makeWrapper } from "../util/wrapper-factory";
-import { SiSpotify } from "@icons-pack/react-simple-icons";
-import { Did } from "@/state/persisted/schema";
+import { PostControls } from "./post-controls";
 
 type PostProps = SkylineSliceItem;
 export function Post({ post, record }: PostProps) {
@@ -66,7 +58,7 @@ export function Post({ post, record }: PostProps) {
 				{record.text ? <RichText richText={postText} /> : null}
 				{post.embed && <PostEmbed embed={post.embed} />}
 				<div className="flex justify-between">
-					<PostActions post={post} />
+					<PostControls post={post} />
 				</div>
 			</div>
 		</div>
@@ -102,124 +94,6 @@ function PostLink({ post, children }: PostLinkProps) {
 		<a target="_blank" rel="noreferrer noopener" href={postUrl}>
 			{children}
 		</a>
-	);
-}
-
-type ActionIconProps =
-	| {
-			icon: "reply";
-			count: number;
-			active?: undefined;
-	  }
-	| {
-			icon: "like" | "repost";
-			count: number;
-			active: boolean;
-	  };
-
-type ActionButtonProps = PropsWithChildren<{
-	type: ActionIconProps["icon"];
-}>;
-function ActionButton({ children, type }: ActionButtonProps) {
-	const colors: Record<ActionButtonProps["type"], string> = {
-		like: "hover:text-goldenrod-400",
-		repost: "hover:text-green-700",
-		reply: "hover:text-blue-500",
-	};
-	return (
-		<button
-			type="button"
-			className={`flex flex-0 items-center gap-x-1 text-base ${colors[type]}`}
-		>
-			{children}
-		</button>
-	);
-}
-function ActionIcon({ icon, count, active }: ActionIconProps) {
-	const Wrapper = makeWrapper("flex flex-1 items-center gap-x-1 text-base");
-	const IconClass = "w-4 h-4";
-	const HoverCount = (count: number, active: boolean) => {
-		return (
-			<>
-				<span className="group-hover:hidden">{count}</span>
-				<span className="hidden group-hover:inline">
-					{active ? count - 1 : count + 1}
-				</span>
-			</>
-		);
-	};
-	switch (icon) {
-		case "reply": {
-			const MessagesIcon =
-				count > 4
-					? MessagesSquareIcon
-					: count > 0
-					? MessageSquareIcon
-					: MessageSquareDashedIcon;
-			return (
-				<div className="flex flex-1">
-					<ActionButton type="reply">
-						<MessagesIcon className={IconClass} /> {count}
-					</ActionButton>
-				</div>
-			);
-		}
-		case "repost": {
-			return (
-				<Wrapper
-					className={cn({
-						"text-green-700": active,
-						"font-medium": active,
-						"hover:text-green-700": !active,
-						"hover:text-inherit": active,
-					})}
-				>
-					<Repeat2Icon className={IconClass} /> {HoverCount(count, active)}
-				</Wrapper>
-			);
-		}
-		case "like":
-			return (
-				<Wrapper>
-					<div
-						className={cn(
-							"group cursor-pointer flex text-base gap-x-1 items-center",
-							{
-								"hover:text-goldenrod-400": !active,
-								"hover:text-inherit": active,
-								"text-goldenrod-400": active,
-								"font-medium": active,
-							},
-						)}
-					>
-						<StarIcon
-							className={cn(IconClass, {
-								"fill-goldenrod-400": active,
-								"group-hover:fill-none": active,
-							})}
-						/>{" "}
-						{HoverCount(count, active)}
-					</div>
-				</Wrapper>
-			);
-	}
-}
-
-function PostActions({ post }: Pick<SkylineSliceItem, "post">) {
-	return (
-		<>
-			<ActionIcon icon="reply" count={Number(post.replyCount)} />
-			<ActionIcon
-				icon="repost"
-				count={Number(post.repostCount)}
-				active={Boolean(post.viewer?.repost)}
-			/>
-			<ActionIcon
-				icon="like"
-				count={Number(post.likeCount)}
-				active={Boolean(post.viewer?.like)}
-			/>
-		</>
 	);
 }
 
