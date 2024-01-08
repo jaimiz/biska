@@ -25,19 +25,15 @@ export function usePostLikeMutation() {
 	return useMutation<
 		{ uri: string }, // responds with the uri of the like
 		Error,
-		{ uri: string; cid: string; likeCount: number } // the post's uri, cid, and likes
+		SkylineSliceItem["post"]
 	>({
 		mutationFn: (post) => getAgent().like(post.uri, post.cid),
 	});
 }
 
 export function usePostUnlikeMutation() {
-	return useMutation<
-		unknown,
-		Error,
-		{ postUri: string; likeUri: string; likeCount: number }
-	>({
-		mutationFn: async ({ likeUri }) => {
+	return useMutation<unknown, Error, string>({
+		mutationFn: async (likeUri) => {
 			await getAgent().deleteLike(likeUri);
 		},
 	});
@@ -54,12 +50,8 @@ export function usePostRepostMutation() {
 }
 
 export function usePostUnrepostMutation() {
-	return useMutation<
-		unknown,
-		Error,
-		{ postUri: string; repostUri: string; repostCount: number }
-	>({
-		mutationFn: async ({ repostUri }) => {
+	return useMutation<unknown, Error, string>({
+		mutationFn: async (repostUri) => {
 			await getAgent().deleteRepost(repostUri);
 		},
 	});

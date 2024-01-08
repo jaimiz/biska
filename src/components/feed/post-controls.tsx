@@ -1,5 +1,10 @@
 import { cn } from "@/lib/utils";
-import { usePostRepostMutation } from "@/state/queries/post";
+import {
+	usePostLikeMutation,
+	usePostRepostMutation,
+	usePostUnlikeMutation,
+	usePostUnrepostMutation,
+} from "@/state/queries/post";
 import { SkylineSliceItem } from "@/state/queries/profile";
 import { ClassValue } from "clsx";
 import {
@@ -10,6 +15,7 @@ import {
 	Repeat2Icon,
 	StarIcon,
 } from "lucide-react";
+import { useState } from "react";
 
 type CounterIconProps = {
 	count?: number;
@@ -34,9 +40,14 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 			? MessageSquareIcon
 			: MessageSquareDashedIcon;
 
-	const hasReposted = Boolean(post.viewer?.repost);
-	const hasLiked = Boolean(post.viewer?.like);
-	const repostPost = usePostRepostMutation();
+	const [hasReposted, setHasReposted] = useState(Boolean(post.viewer?.repost));
+	const [hasLiked, setHasLiked] = useState(Boolean(post.viewer?.like));
+	const [repostCount, setRepostCount] = useState(post.repostCount ?? 0);
+	const [likeCount, setLikeCount] = useState(post.likeCount ?? 0);
+	const repost = usePostRepostMutation();
+	const like = usePostLikeMutation();
+	const unrepost = usePostUnrepostMutation();
+	const unlike = usePostUnlikeMutation();
 	return (
 		<>
 			<button type="button" className="flex hover:text-blue-500">
@@ -45,31 +56,66 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 			<button
 				type="button"
 				onClick={() => {
-					repostPost.mutate(post);
+					if (hasReposted) {
+						setHasReposted(false);
+						setRepostCount((c) => c - 1);
+						try {
+							// FIXME: If the user doesn't refresh the page, this will be null
+							// and we can't unlike/unrepost
+							// biome-ignore lint/style/noNonNullAssertion: <explanation>
+							unrepost.mutate(post.viewer!.repost as string);
+						} catch {
+							setRepostCount((c) => c + 1);
+							setHasReposted(true);
+						}
+						return;
+					}
+					setRepostCount((c) => c + 1);
+					setHasReposted(true);
+					repost.mutate(post);
 				}}
 				className={cn(
 					"flex",
-					hasReposted && ["hover:text-inherit", "text-green-700"],
+					hasReposted && ["text-green-700"],
 					!hasReposted && ["text-inherit", "hover:text-green-700"],
 				)}
 			>
-				<CounterIcon Icon={Repeat2Icon} count={Number(post.repostCount)} />
+				<CounterIcon Icon={Repeat2Icon} count={repostCount} />
 			</button>
 			<button
 				type="button"
+				onClick={() => {
+					if (hasLiked) {
+						setHasLiked(false);
+						setLikeCount((c) => c - 1);
+						try {
+							// FIXME: If the user doesn't refresh the page, this will be null
+							// and we can't unlike/unrepost
+							// biome-ignore lint/style/noNonNullAssertion: <explanation>
+							unlike.mutate(post.viewer!.like as string);
+						} catch {
+							setHasLiked(true);
+							setLikeCount((c) => c + 1);
+						}
+						return;
+					}
+					setHasLiked(true);
+					setLikeCount((c) => c + 1);
+					like.mutate(post);
+				}}
 				className={cn(
 					"flex group",
-					hasLiked && ["hover:text-inherit", "text-goldenrod-400"],
+					hasLiked && ["text-goldenrod-400"],
 					!hasLiked && ["text-base", "hover:text-goldenrod-400"],
 				)}
 			>
 				<CounterIcon
-					className={cn("group-hover:fill-current", {
-						"group-hover:fill-none": hasLiked,
+					className={cn("group-hover:fill-none", {
 						"fill-current": hasLiked,
+						"stroke-current": hasLiked,
 					})}
 					Icon={StarIcon}
-					count={Number(post.likeCount)}
+					count={likeCount}
 				/>
 			</button>
 		</>

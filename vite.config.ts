@@ -56,10 +56,10 @@ export default defineConfig({
 				plugins: [jotaiDebugLabel, jotaiReactRefresh],
 			},
 		}),
-		VitePWA({ registerType: "prompt", devOptions: { enabled: true } }),
+		VitePWA({ registerType: "prompt", devOptions: { enabled: false } }),
 		eslintPlugin(),
 		checkerPlugin({
-			typescript: true
-		})
+			typescript: true,
+		}),
 	],
 });
