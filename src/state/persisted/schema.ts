@@ -78,6 +78,6 @@ export const defaultAppSchema: AppSchema = {
 	},
 	columns: [],
 	meta: {
-		version: YABC_VERSION,
+		version: BISKA_VERSION,
 	},
 };

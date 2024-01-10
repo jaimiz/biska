@@ -1,9 +1,5 @@
-# YABC
+# Biska
 
-> Yet Another Bluesky Client
+> Former YABC - Yet Another Bluesky Client
 
-Este é um client experimental pra interagir com o [Bluesky](https://bsky.app)
-
-
-
-
+Este é um client experimental pra interagir com a busca do [Bluesky](https://bsky.app)

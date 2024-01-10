@@ -1,3 +1,3 @@
 /// <reference types="vite/client" />
 
-declare const YABC_VERSION: string;
+declare const BISKA_VERSION: string;

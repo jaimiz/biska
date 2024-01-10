@@ -1,1 +1,1 @@
-declare const YABC_VERSION: string
+declare const BISKA_VERSION: string;

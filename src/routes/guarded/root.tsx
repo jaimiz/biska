@@ -83,7 +83,7 @@ export function RootRoute() {
 						Sair
 					</button>
 					<span className="text-xs text-purple-300">
-						version {YABC_VERSION}
+						version {BISKA_VERSION}
 					</span>
 				</div>
 			</div>

@@ -46,7 +46,7 @@ export default defineConfig({
 		port: 3000,
 	},
 	define: {
-		YABC_VERSION: JSON.stringify(await getVersion()),
+		BISKA_VERSION: JSON.stringify(await getVersion()),
 	},
 	plugins: [
 		pluginRewriteAll(),

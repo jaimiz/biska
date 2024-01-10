@@ -85,7 +85,7 @@ export function Search() {
 	return (
 		<div className="flex flex-col items-center w-full justify-start pt-4 h-screen overflow-auto bg-gray-100 dark:bg-gray-900">
 			<div className="flex justify-between w-full max-w-[1000px] my-6 m-auto">
-				<h2 className="text-3xl">YABC - Busca</h2>
+				<h2 className="text-3xl">Biska</h2>
 				<div>
 					Logado como{" "}
 					<ProfileDisplayName
@@ -180,7 +180,7 @@ export function Search() {
 				""
 			)}
 			<div className="flex self-center mt-auto text-xs text-purple-300">
-				versão {YABC_VERSION}
+				versão {BISKA_VERSION}
 			</div>
 		</div>
 	);
