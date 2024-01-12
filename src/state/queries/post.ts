@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Did } from "../persisted/schema";
-import { getAgent } from "../session";
+import { Did } from "../schema";
 import { SkylineSliceItem } from "./profile";
+import { getAgent } from "@/services/api";
 
 const RQKEY = (repo: string, rkey: string) => ["post", repo, rkey];
 
@@ -15,7 +15,6 @@ export const usePostQuery = ({ rkey, repo }: { rkey: string; repo: Did }) => {
 				repo,
 				rkey,
 			});
-			console.log({ res });
 			return res;
 		},
 	});

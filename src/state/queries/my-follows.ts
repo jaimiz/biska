@@ -1,8 +1,9 @@
+import { getAgent } from "@/services/api";
 import { AppBskyActorDefs } from "@atproto/api";
 import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
-import { getAgent, sessionAtom } from "../session";
 import { STALE } from ".";
+import { currentAccountAtom } from "../atoms/session";
 
 // sanity limit is SANITY_PAGE_LIMIT*PAGE_SIZE total records
 const SANITY_PAGE_LIMIT = 1000;
@@ -12,7 +13,7 @@ const PAGE_SIZE = 100;
 export const RQKEY = () => ["my-follows"];
 
 export function useMyFollowsQuery() {
-	const { currentAccount } = useAtomValue(sessionAtom);
+	const currentAccount = useAtomValue(currentAccountAtom);
 	return useQuery<AppBskyActorDefs.ProfileViewBasic[]>({
 		staleTime: STALE.MINUTES.ONE,
 		queryKey: RQKEY(),

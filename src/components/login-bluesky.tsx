@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BSKY_SOCIAL_SERVICE } from "@/state/queries";
-import { api } from "@/state/session";
-import { Cloud, RadarIcon } from "lucide-react";
+import { Cloud } from "lucide-react";
 import { useState } from "react";
 import {
 	Dialog,
@@ -19,6 +18,8 @@ import { Label } from "./ui/label";
 import { AlertCircle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Spinner } from "./ui/spinner";
+import { bskyApi } from "@/services/api";
 
 export function AlertDestructive() {
 	return (
@@ -60,7 +61,7 @@ export function BlueskyLogin() {
 						const password = formData.get("password") as string;
 						if (identifier === "" || password === "") return;
 						try {
-							await api.login({
+							await bskyApi.login({
 								service: BSKY_SOCIAL_SERVICE,
 								identifier,
 								password,
@@ -129,7 +130,7 @@ h-10 rounded-md border border-input bg-background text-sm ring-offset-background
 						>
 							{isSubmitting ? (
 								<>
-									<RadarIcon className="animate-spin" /> Entrando…
+									<Spinner /> Entrando…
 								</>
 							) : (
 								"Login"

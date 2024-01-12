@@ -6,7 +6,8 @@ import { Sheet, SheetContent } from "./ui/sheet";
 export function Drawer({
 	children,
 	open,
-}: PropsWithChildren<{ open: boolean }>) {
+	onClose,
+}: PropsWithChildren<{ open: boolean; onClose?: () => void }>) {
 	const navigate = useNavigate();
 
 	return (
@@ -15,6 +16,9 @@ export function Drawer({
 			onOpenChange={(isOpening) => {
 				if (!isOpening) {
 					navigate("/");
+					if (onClose && typeof onClose === "function") {
+						onClose();
+					}
 				}
 			}}
 		>

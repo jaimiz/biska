@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { behaviorPreferencesAtom } from "@/state/atoms/preferences";
+import { useAtomValue } from "jotai";
 import { RefAttributes } from "react";
 import {
 	Link as RouterLink,
@@ -16,6 +18,14 @@ export function AppLink(props: LinkProps) {
 		? props.to
 		: `https://bsky.app${props.to}`;
 	return <RouterLink {...props} to={bskyLink} target="_blank" />;
+}
+
+export function ProfileLink(props: LinkProps) {
+	const { openProfileIn } = useAtomValue(behaviorPreferencesAtom);
+	if (openProfileIn === "bsky") {
+		return <AppLink {...props} />;
+	}
+	return <RouterLink {...props} />;
 }
 
 export function ContainerLink({ children, className, ...rest }: LinkProps) {

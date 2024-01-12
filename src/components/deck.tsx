@@ -1,10 +1,10 @@
-import { columnsAtom } from "@/state/columns";
-import { PersistedAccount } from "@/state/persisted/schema";
-import { currentAccountAtom } from "@/state/session";
+import { columnsAtom } from "@/state/atoms/columns";
 import { useAtom, useAtomValue } from "jotai";
 import { Outlet } from "react-router-dom";
 import { DeckColumn } from "./column";
 import { Drawer } from "./drawer";
+import { PersistedAccount } from "@/state/schema";
+import { currentAccountAtom } from "@/state/atoms/session";
 
 export type DeckProps = {
 	openDrawer?: boolean;

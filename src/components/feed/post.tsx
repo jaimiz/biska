@@ -1,6 +1,6 @@
 import { makeHandleLink } from "@/lib/strings/handle";
 import { cn } from "@/lib/utils";
-import { Did } from "@/state/persisted/schema";
+import { Did } from "@/state/schema";
 import {
 	useProfileQuery,
 	type SkylineSliceItem,

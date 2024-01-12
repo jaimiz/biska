@@ -1,54 +1,13 @@
-import * as persisted from "@/state/persisted";
+import { PUBLIC_BSKY_AGENT } from "@/state/queries";
+import type { Did, PersistedAccount, Session } from "@/state/schema";
+import { state, persisted } from "@/state/state";
 import { AtpPersistSessionHandler, BskyAgent } from "@atproto/api";
-import { atom } from "jotai";
-import { Did, PersistedAccount } from "../persisted/schema";
-import { PUBLIC_BSKY_AGENT } from "../queries";
 
 let __currentAgent: BskyAgent = PUBLIC_BSKY_AGENT;
 
 export function getAgent() {
 	return __currentAgent;
 }
-
-export type Session = {
-	isInitialLoad: boolean;
-	isSwitchingAccounts: boolean;
-	accounts: PersistedAccount[];
-	currentAccount: PersistedAccount | undefined;
-};
-
-export const sessionAtom = atom<Session>({
-	isInitialLoad: true,
-	isSwitchingAccounts: false,
-	accounts: [],
-	currentAccount: undefined,
-});
-
-sessionAtom.onMount = (setAtom) => {
-	setAtom({
-		isInitialLoad: true,
-		isSwitchingAccounts: false,
-		accounts: persisted.get("session").accounts,
-		currentAccount: persisted.get("session").currentAccount,
-	});
-};
-
-export const persistentSessionAtom = atom(
-	(get) => {
-		return get(sessionAtom);
-	},
-	(_, set, update: Session) => {
-		set(sessionAtom, update);
-		persisted.write("session", {
-			accounts: update.accounts,
-			currentAccount: update.currentAccount,
-		});
-	},
-);
-
-export const currentAccountAtom = atom((get) => {
-	return get(sessionAtom).currentAccount;
-});
 
 export type ApiMethods = {
 	login: (props: {
@@ -64,15 +23,16 @@ export type ApiMethods = {
 };
 
 export function setSessionAndPersist(fn: (prev: Session) => Session) {
-	const prev = persisted.stateStore.get(persistentSessionAtom);
-	persisted.stateStore.set(persistentSessionAtom, fn(prev));
-	return persisted.stateStore.get(persistentSessionAtom);
+	const prev = state.session;
+	state.session = fn(prev);
+	persisted.write("session", state.session);
+	return state.session;
 }
 
 export function setSession(fn: (prev: Session) => Session) {
-	const prev = persisted.stateStore.get(sessionAtom);
-	persisted.stateStore.set(sessionAtom, fn(prev));
-	return persisted.stateStore.get(sessionAtom);
+	const prev = state.session;
+	persisted.write("session", fn(prev));
+	return state.session;
 }
 
 function createPersistSessionHandler(
@@ -213,8 +173,8 @@ const resumeSession: ApiMethods["resumeSession"] = async (account) => {
 	} finally {
 		setSession((session) => ({
 			...session,
-			isInitialLoad: false,
 		}));
+		state.sessionState.isInitialLoad = false;
 	}
 };
 
@@ -226,7 +186,7 @@ const clearCurrentAccount = () => {
 	}));
 };
 
-export const api: ApiMethods = {
+export const bskyApi: ApiMethods = {
 	login,
 	logout,
 	initSession,

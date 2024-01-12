@@ -5,10 +5,10 @@ import {
 } from "@atproto/api";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { Did } from "../persisted/schema";
-import { getAgent } from "../session";
+import { Did } from "../schema";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { isBlockedByError, isBlockingError } from "@/lib/errors";
+import { getAgent } from "@/services/api";
 
 export const RQKEY = (did?: Did) => ["profile", did ?? ""];
 

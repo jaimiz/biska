@@ -1,4 +1,4 @@
 import { atom } from "jotai";
-import { Column } from "./persisted/schema";
+import { Column } from "../schema";
 
 export const columnsAtom = atom<Column[]>([]);

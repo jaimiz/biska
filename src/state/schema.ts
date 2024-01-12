@@ -9,7 +9,6 @@ export type Did = z.infer<typeof did>;
 
 /* Schema */
 
-/* Sections */
 const accountSchema = z.object({
 	service: z.string(),
 	did,
@@ -22,9 +21,19 @@ const accountSchema = z.object({
 
 export type PersistedAccount = z.infer<typeof accountSchema>;
 
+const sessionSchema = z.object({
+	accounts: z.array(accountSchema),
+	currentAccount: accountSchema.optional(),
+});
+
+export type Session = z.infer<typeof sessionSchema>;
+
 const preferencesSchema = z.object({
 	interface: z.object({
 		profilePictureStyle: z.enum(["round", "square"]).default("square"),
+	}),
+	behavior: z.object({
+		openProfileIn: z.enum(["app", "bsky"]).default("bsky"),
 	}),
 });
 
@@ -53,27 +62,40 @@ export type Column = z.infer<typeof columnSchema>;
 
 /* General Schema */
 
-export const AppSchema = z.object({
-	session: z.object({
-		accounts: z.array(accountSchema),
-		currentAccount: accountSchema.optional(),
-	}),
+export const StorageSchema = z.object({
+	session: sessionSchema,
 	preferences: preferencesSchema,
 	columns: z.array(columnSchema),
 	meta: appMetaSchema,
 });
 
+export const AppSchema = z
+	.object({
+		sessionState: z.object({
+			isInitialLoad: z.boolean(),
+		}),
+	})
+	.and(StorageSchema);
+
+export type StorageSchema = z.infer<typeof StorageSchema>;
 export type AppSchema = z.infer<typeof AppSchema>;
 
+export type StorageSchemaKey = keyof StorageSchema;
 export type AppSchemaKey = keyof AppSchema;
 
 export const defaultAppSchema: AppSchema = {
+	sessionState: {
+		isInitialLoad: true,
+	},
 	session: {
 		accounts: [],
 	},
 	preferences: {
 		interface: {
 			profilePictureStyle: "square",
+		},
+		behavior: {
+			openProfileIn: "bsky",
 		},
 	},
 	columns: [],

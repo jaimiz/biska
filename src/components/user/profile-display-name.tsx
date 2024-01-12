@@ -1,7 +1,8 @@
-import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { AppLink } from "../link";
-import { ClassValue } from "clsx";
 import { cn } from "@/lib/utils";
+import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import { ClassValue } from "clsx";
+import { ProfileLink } from "../link";
+import { atom, useSetAtom } from "jotai";
 
 type ProfileDisplayNameProps = {
 	profile: ProfileViewDetailed;
@@ -9,10 +10,15 @@ type ProfileDisplayNameProps = {
 	showUsername?: boolean;
 };
 
+export const peekProfileAtom = atom<ProfileViewDetailed | null>(null);
 export function ProfileDisplayName(props: ProfileDisplayNameProps) {
 	const { profile, className, showUsername = true } = props;
+	const setPeekProfile = useSetAtom(peekProfileAtom);
 	return (
-		<AppLink
+		<ProfileLink
+			onClick={() => {
+				setPeekProfile(profile);
+			}}
 			to={`/profile/${profile.handle}`}
 			className={cn(
 				"flex items-center gap-x-1 whitespace-nowrap max-w-[80%] overflow-hidden",
@@ -28,6 +34,6 @@ export function ProfileDisplayName(props: ProfileDisplayNameProps) {
 					@{profile.handle}
 				</div>
 			)}
-		</AppLink>
+		</ProfileLink>
 	);
 }

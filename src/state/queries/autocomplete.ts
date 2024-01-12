@@ -3,8 +3,8 @@ import { AppBskyActorDefs } from "@atproto/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { STALE } from ".";
-import { getAgent } from "../session";
 import { useMyFollowsQuery } from "./my-follows";
+import { getAgent } from "@/services/api";
 
 export const RQKEY = (prefix: string) => ["actor-autocomplete", prefix];
 

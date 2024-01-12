@@ -1,32 +1,37 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Provider as AtomProvider, getDefaultStore, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Centered } from "./components/layouts/Centered";
 import { LoginScreen } from "./components/login-screen";
+import { Spinner } from "./components/ui/spinner";
 import { Profile } from "./components/user/profile";
 import { queryClient } from "./lib/react-query";
-import { IndexRoute } from "./routes/guarded";
-import { RootRoute } from "./routes/guarded/root";
-import { TimeTickProvider } from "./state/clock";
-import * as persisted from "./state/persisted";
-import { api, currentAccountAtom, sessionAtom } from "./state/session";
 import { Search } from "./routes/guarded/search";
+import { bskyApi } from "./services/api";
+import { currentAccountAtom, sessionStateAtom } from "./state/atoms/session";
+import { TimeTickProvider } from "./state/clock";
+import { persisted } from "./state/state";
+
+function LoadingScreen() {
+	return (
+		<Centered>
+			<h1 className="text-3xl font-bold text-center">
+				<Spinner />
+			</h1>
+		</Centered>
+	);
+}
 
 export function AppRouter() {
 	const router = createBrowserRouter([
 		{
 			path: "/",
-			element: <RootRoute />,
+			element: <Search />,
 			children: [
 				{
-					path: ":expand?",
-					Component: IndexRoute,
-					children: [
-						{
-							path: "profile/:handleOrDid",
-							Component: Profile,
-						},
-					],
+					path: "profile/:handleOrDid",
+					Component: Profile,
 				},
 			],
 		},
@@ -38,39 +43,32 @@ export function AppRouter() {
 	);
 }
 function AppLogin() {
-	const { isInitialLoad } = useAtomValue(sessionAtom);
+	const { isInitialLoad } = useAtomValue(sessionStateAtom);
 	const currentAccount = useAtomValue(currentAccountAtom);
 	// init
 	useEffect(() => {
 		const account = persisted.get("session").currentAccount;
-		api.resumeSession(account);
+		bskyApi.resumeSession(account);
 	}, []);
 
 	// show nothing prior to init
 	if (isInitialLoad) {
-		// TODO add a loading state
-		return null;
+		return <LoadingScreen />;
 	}
 	/*
 	 * Session and initial state should be loaded prior to rendering below.
 	 */
 
-	const SearchRouter = createBrowserRouter([
-		{ path: "/", element: <Search /> },
-	]);
-
-	return currentAccount ? (
-		<RouterProvider router={SearchRouter} />
-	) : (
-		<LoginScreen />
-	);
+	return currentAccount ? <AppRouter /> : <LoginScreen />;
 }
 
 function App() {
 	const [isReady, setReady] = useState(false);
 
 	useEffect(() => {
-		persisted.init().then(() => setReady(true));
+		persisted.init().then(() => {
+			setReady(true);
+		});
 	}, []);
 
 	if (!isReady) {
@@ -78,9 +76,7 @@ function App() {
 	}
 	return (
 		<QueryClientProvider client={queryClient}>
-			<AtomProvider store={getDefaultStore()}>
-				<AppLogin />
-			</AtomProvider>
+			<AppLogin />
 		</QueryClientProvider>
 	);
 }
