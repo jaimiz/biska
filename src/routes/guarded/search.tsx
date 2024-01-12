@@ -3,8 +3,16 @@ import { Drawer } from "@/components/drawer";
 import { Post } from "@/components/feed/post";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TextButton } from "@/components/ui/text-button";
 import { ProfileDisplayName } from "@/components/user/profile-display-name";
 import { bskyApi } from "@/services/api";
 import { behaviorPreferencesAtom } from "@/state/atoms/preferences";
@@ -75,7 +83,6 @@ function SearchResults({ query }: { query: string }) {
 
 export function Search() {
 	const currentUser = useAtomValue(currentAccountAtom);
-	const [behavior, setBehavior] = useAtom(behaviorPreferencesAtom);
 	const currentUserProfile = useProfileQuery({ did: currentUser?.did });
 	const [search, setSearch] = useState("");
 	const [query, setQuery] = useState("");
@@ -91,50 +98,25 @@ export function Search() {
 		<div className="flex flex-col items-center w-full justify-start pt-4 h-screen overflow-auto bg-gray-100 dark:bg-gray-900">
 			<div className="flex justify-between w-full max-w-[1000px] my-6 m-auto">
 				<h2 className="text-3xl">Biska</h2>
-				<div>
+				<div className="flex gap-x-2 items-center">
 					Logado como{" "}
 					<ProfileDisplayName
 						className="inline-flex"
 						profile={currentUserProfile.data as ProfileViewDetailed}
 					/>{" "}
-					&middot;{" "}
+					&middot; <PreferencesDrawer /> |
 					<button
 						type="button"
 						onClick={() => {
 							bskyApi.logout();
 						}}
-						className="text-sm text-purple-400"
+						className="text-sm text-purple-400 hover:text-purple-600"
 					>
 						Sair
 					</button>
 				</div>
 			</div>
-			<div className="flex justify-between w-full max-w-[1000px] my-6 m-auto">
-				<Tabs
-					value={behavior.openProfileIn}
-					className="flex items-center my-2 mx-0"
-					onValueChange={(value) => {
-						setBehavior({
-							openProfileIn: value as "app" | "bsky",
-						});
-					}}
-				>
-					<TabsList className="h-auto items-stretch gap-x-2">
-						<TabsTrigger
-							className="data-[state=active]:bg-purple-300"
-							value="app"
-						>
-							Abrir o perfil no Biska
-						</TabsTrigger>
-						<TabsTrigger
-							className="data-[state=active]:bg-purple-300"
-							value="bsky"
-						>
-							Abrir o perfil no Bluesky
-						</TabsTrigger>
-					</TabsList>
-				</Tabs>
-			</div>
+
 			<div className="flex w-full max-w-[1000px] justify-center items-center gap-x-4">
 				<Input
 					value={search}
@@ -219,5 +201,59 @@ export function Search() {
 				versão {BISKA_VERSION}
 			</div>
 		</div>
+	);
+}
+
+function PreferencesDrawer() {
+	const [behavior, setBehavior] = useAtom(behaviorPreferencesAtom);
+	return (
+		<Sheet>
+			<div className="flex items-center text-xs">
+				<SheetTrigger className="flex gap-x-1" asChild>
+					<TextButton className="text-sm text-purple-400 hover:text-purple-600">
+						Preferências
+					</TextButton>
+				</SheetTrigger>
+			</div>
+			<SheetContent
+				side={"right"}
+				className="w-full max-w-none overflow-y-auto sm:max-w-none lg:w-1/3"
+			>
+				<SheetTitle>Preferências</SheetTitle>
+				<SheetDescription>
+					<div className="flex justify-between w-full">
+						<Tabs
+							value={behavior.openProfileIn}
+							className="flex items-center w-full"
+							onValueChange={(value) => {
+								setBehavior({
+									openProfileIn: value as "app" | "bsky",
+								});
+							}}
+						>
+							<TabsList className="h-auto items-stretch gap-x-2 w-full">
+								<TabsTrigger
+									className="data-[state=active]:bg-purple-300 flex-1"
+									value="app"
+								>
+									Abrir o perfil no Biska
+								</TabsTrigger>
+								<TabsTrigger
+									className="data-[state=active]:bg-purple-300 flex-1"
+									value="bsky"
+								>
+									Abrir o perfil no Bluesky
+								</TabsTrigger>
+							</TabsList>
+						</Tabs>
+					</div>
+					<p className="text-sm text-muted-foreground">
+						{behavior.openProfileIn === "app"
+							? "Quando você clicar num perfil, ele vai aparecer na parte direita da tela, da mesma forma que o painel de preferências está aparecendo agora."
+							: "Quando você clicar num perfil, ele vai abrir o perfil do usuário no bsky.app. O perfil será aberto numa nova aba, pra que você não perca o resultado da busca."}
+					</p>
+				</SheetDescription>
+			</SheetContent>
+		</Sheet>
 	);
 }
