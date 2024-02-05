@@ -29,9 +29,11 @@
 		"jotai-valtio": "0.4.0",
 		"localforage": "1.10.0",
 		"lucide-react": "0.292.0",
+		"next-themes": "0.2.1",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-router-dom": "6.19.0",
+		"sonner": "1.4.0",
 		"tailwind-merge": "2.0.0",
 		"tailwindcss-animate": "1.0.7",
 		"valtio": "1.13.0",
@@ -62,7 +64,8 @@
 		"vite-plugin-checker": "0.6.2",
 		"vite-plugin-pwa": "0.16.7",
 		"vite-plugin-rewrite-all": "1.0.2",
-		"vite-tsconfig-paths": "4.2.1"
+		"vite-tsconfig-paths": "4.2.1",
+		"workbox-window": "7.0.0"
 	},
 	"lint-staged": {
 		"src/**/*.{ts,tsx}": [

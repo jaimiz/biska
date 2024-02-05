@@ -2,8 +2,10 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { useReloadPrompt } from "./lib/useServiceWorker";
 import { Centered } from "./components/layouts/Centered";
 import { LoginScreen } from "./components/login-screen";
+import { Toaster } from "./components/ui/sonner";
 import { Spinner } from "./components/ui/spinner";
 import { Profile } from "./components/user/profile";
 import { queryClient } from "./lib/react-query";
@@ -45,6 +47,7 @@ export function AppRouter() {
 function AppLogin() {
 	const { isInitialLoad } = useAtomValue(sessionStateAtom);
 	const currentAccount = useAtomValue(currentAccountAtom);
+	useReloadPrompt();
 	// init
 	useEffect(() => {
 		const account = persisted.get("session").currentAccount;
@@ -72,11 +75,12 @@ function App() {
 	}, []);
 
 	if (!isReady) {
-		return null;
+		return <LoadingScreen />;
 	}
 	return (
 		<QueryClientProvider client={queryClient}>
 			<AppLogin />
+			<Toaster />
 		</QueryClientProvider>
 	);
 }
