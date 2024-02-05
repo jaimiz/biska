@@ -22,8 +22,8 @@ import { useSearchPostsQuery } from "@/state/queries/search";
 import { AppBskyFeedPost } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { useAtom, useAtomValue } from "jotai";
-import { useRef, useState } from "react";
-import { Outlet, useMatch } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Outlet, useMatch, Form, useSearchParams } from "react-router-dom";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
@@ -84,16 +84,58 @@ function SearchResults({ query }: { query: string }) {
 export function Search() {
 	const currentUser = useAtomValue(currentAccountAtom);
 	const currentUserProfile = useProfileQuery({ did: currentUser?.did });
-	const [search, setSearch] = useState("");
+	const [searchTerms, setSearchTerms] = useState("");
 	const [query, setQuery] = useState("");
 	const [searchType, setSearchType] = useState<"all" | "me" | "user">("all");
 	const [userToSearch, setUserToSearch] = useState("");
 	const isClearingUser = useRef(false);
 	const isRoot = useMatch("/");
+	const [searchParams] = useSearchParams();
+
+	function submitQuery() {
+		if (searchType === "me" && searchTerms !== "") {
+			setQuery(`${searchTerms} from:${currentUser?.handle}`);
+			return;
+		}
+		if (searchType === "user" && searchTerms !== "" && userToSearch !== "") {
+			setQuery(`${searchTerms} from:${userToSearch}`);
+			return;
+		}
+		setQuery(searchTerms);
+	}
+	useEffect(() => {
+		const q = searchParams.get("q");
+		if (!q) {
+			return;
+		}
+		const searchQuery = q.split(" ") ?? [];
+		if (searchQuery.length < 1) {
+			return;
+		}
+		const [user] =
+			searchQuery
+				?.filter((a) => a.startsWith("from:"))
+				.map((from) => {
+					const [, user] = from.split(":");
+					return user;
+				}) ?? [];
+		const searchTerms = searchQuery
+			.filter((a) => !a.startsWith("from:"))
+			.join(" ");
+		if (user === currentUser?.handle) {
+			setSearchType("me");
+		} else if (user && user !== currentUser?.handle) {
+			setSearchType("user");
+			setUserToSearch(user);
+		}
+		setSearchTerms(searchTerms);
+		submitQuery();
+	}, [searchParams, currentUser]);
 
 	if (!currentUserProfile.data) {
 		return null;
 	}
+
 	return (
 		<div className="flex flex-col items-center w-full justify-start pt-4 h-screen overflow-auto bg-gray-100 dark:bg-gray-900">
 			<div className="flex justify-between w-full max-w-[1000px] my-6 m-auto">
@@ -117,73 +159,67 @@ export function Search() {
 				</div>
 			</div>
 
-			<div className="flex w-full max-w-[1000px] justify-center items-center gap-x-4">
-				<Input
-					value={search}
-					onChange={(e) => setSearch(e.target.value)}
-					type="search"
-					placeholder="Buscar no Bluesky"
-				/>{" "}
-				<Button
-					type="submit"
-					onClick={() => {
-						if (searchType === "me" && search !== "") {
-							setQuery(`${search} from:${currentUserProfile.data.handle}`);
+			<Form method="get" action="/">
+				<div className="flex w-full max-w-[1000px] justify-center items-center gap-x-4">
+					<input type="hidden" name="q" value={query} />
+					<Input
+						value={searchTerms}
+						onChange={(e) => setSearchTerms(e.target.value)}
+						type="search"
+						placeholder="Buscar no Bluesky"
+					/>{" "}
+					<Button type="submit" onClick={() => submitQuery()}>
+						Buscar
+					</Button>
+				</div>
+				<Tabs
+					value={searchType}
+					className="flex items-center my-2 mx-0"
+					onValueChange={(value) => {
+						if (!isClearingUser.current) {
+							setSearchType(value as "all" | "me" | "user");
 							return;
 						}
-						if (searchType === "user" && search !== "" && userToSearch !== "") {
-							setQuery(`${search} from:${userToSearch}`);
-							return;
-						}
-						setQuery(search);
+						isClearingUser.current = false;
 					}}
 				>
-					Buscar
-				</Button>
-			</div>
-			<Tabs
-				value={searchType}
-				className="flex items-center my-2 mx-0"
-				onValueChange={(value) => {
-					if (!isClearingUser.current) {
-						setSearchType(value as "all" | "me" | "user");
-						return;
-					}
-					isClearingUser.current = false;
-				}}
-			>
-				<TabsList className="h-auto items-stretch gap-x-2">
-					<TabsTrigger
-						className="data-[state=active]:bg-purple-300"
-						value="all"
-					>
-						Buscar em todos os posts
-					</TabsTrigger>
-					<TabsTrigger className="data-[state=active]:bg-purple-300" value="me">
-						Buscar somente nos meus posts
-					</TabsTrigger>
-					<TabsTrigger
-						asChild
-						className="data-[state=active]:bg-purple-300"
-						value="user"
-					>
-						<div className="gap-x-2 cursor-pointer">
-							Buscar nos posts do usuário{" "}
-							<AutocompleteUsers
-								onSelect={(e: string) => {
-									setUserToSearch(e);
-									if (e === "") {
-										setSearchType("all");
-										isClearingUser.current = true;
-									} else {
-										setSearchType("user");
-									}
-								}}
-							/>
-						</div>
-					</TabsTrigger>
-				</TabsList>
-			</Tabs>
+					<TabsList className="h-auto items-stretch gap-x-2">
+						<TabsTrigger
+							className="data-[state=active]:bg-purple-300"
+							value="all"
+						>
+							Buscar em todos os posts
+						</TabsTrigger>
+						<TabsTrigger
+							className="data-[state=active]:bg-purple-300"
+							value="me"
+						>
+							Buscar somente nos meus posts
+						</TabsTrigger>
+						<TabsTrigger
+							asChild
+							className="data-[state=active]:bg-purple-300"
+							value="user"
+						>
+							<div className="gap-x-2 cursor-pointer">
+								Buscar nos posts do usuário{" "}
+								<AutocompleteUsers
+									value={userToSearch}
+									onSelect={(e: string) => {
+										setUserToSearch(e);
+										if (e === "") {
+											setSearchType("all");
+											isClearingUser.current = true;
+										} else {
+											setSearchType("user");
+										}
+									}}
+								/>
+							</div>
+						</TabsTrigger>
+					</TabsList>
+				</Tabs>
+			</Form>
 
 			{query ? (
 				<div className="max-w-[600px]">

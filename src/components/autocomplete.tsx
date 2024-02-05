@@ -19,11 +19,12 @@ import { useEffect, useState } from "react";
 
 type AutocompleteProps = {
 	onSelect?: (value: string) => void;
+	value?: string;
 };
 export function AutocompleteUsers(props: AutocompleteProps) {
 	const queryAutocomplete = useActorAutocompleteFn();
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState("");
+	const [value, setValue] = useState(props.value ?? "");
 	const [query, setQuery] = useState("");
 	const [options, setOptions] = useState<
 		Array<{ value: string; label: string }>
