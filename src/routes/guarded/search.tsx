@@ -14,6 +14,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextButton } from "@/components/ui/text-button";
 import { ProfileDisplayName } from "@/components/user/profile-display-name";
+import { buildSearchQuery, parseSearchQuery } from "@/lib/search-parser";
 import { bskyApi } from "@/services/api";
 import { behaviorPreferencesAtom } from "@/state/atoms/preferences";
 import { currentAccountAtom } from "@/state/atoms/session";
@@ -22,8 +23,9 @@ import { useSearchPostsQuery } from "@/state/queries/search";
 import { AppBskyFeedPost } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { useAtom, useAtomValue } from "jotai";
+import { ExternalLinkIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Outlet, useMatch, Form, useSearchParams } from "react-router-dom";
+import { Form, Outlet, useMatch, useSearchParams } from "react-router-dom";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
@@ -92,18 +94,7 @@ export function Search() {
 	const isRoot = useMatch("/");
 	const [searchParams] = useSearchParams();
 
-	function submitQuery() {
-		if (searchType === "me" && searchTerms !== "") {
-			setQuery(`${searchTerms} from:${currentUser?.handle}`);
-			return;
-		}
-		if (searchType === "user" && searchTerms !== "" && userToSearch !== "") {
-			setQuery(`${searchTerms} from:${userToSearch}`);
-			return;
-		}
-		setQuery(searchTerms);
-	}
-	useEffect(() => {
+	function readQueryFromUrl() {
 		const q = searchParams.get("q");
 		if (!q) {
 			return;
@@ -112,25 +103,19 @@ export function Search() {
 		if (searchQuery.length < 1) {
 			return;
 		}
-		const [user] =
-			searchQuery
-				?.filter((a) => a.startsWith("from:"))
-				.map((from) => {
-					const [, user] = from.split(":");
-					return user;
-				}) ?? [];
-		const searchTerms = searchQuery
-			.filter((a) => !a.startsWith("from:"))
-			.join(" ");
-		if (user === currentUser?.handle) {
+		const { terms, from } = parseSearchQuery(q);
+		if (from === currentUser?.handle) {
 			setSearchType("me");
-		} else if (user && user !== currentUser?.handle) {
+		} else if (from && from !== currentUser?.handle) {
 			setSearchType("user");
-			setUserToSearch(user);
+			setUserToSearch(from);
 		}
-		setSearchTerms(searchTerms);
-		submitQuery();
-	}, [searchParams, currentUser]);
+		setSearchTerms(terms);
+		setQuery(q);
+		return;
+	}
+
+	useEffect(readQueryFromUrl, []);
 
 	if (!currentUserProfile.data) {
 		return null;
@@ -168,7 +153,34 @@ export function Search() {
 						type="search"
 						placeholder="Buscar no Bluesky"
 					/>{" "}
-					<Button type="submit" onClick={() => submitQuery()}>
+					<Button
+						type="submit"
+						onClick={() => {
+							if (searchType === "me" && searchTerms !== "") {
+								setQuery(
+									buildSearchQuery({
+										terms: searchTerms,
+										from: currentUser?.handle as string,
+									}),
+								);
+								return;
+							}
+							if (
+								searchType === "user" &&
+								searchTerms !== "" &&
+								userToSearch !== ""
+							) {
+								setQuery(
+									buildSearchQuery({
+										terms: searchTerms,
+										from: userToSearch,
+									}),
+								);
+								return;
+							}
+							setQuery(buildSearchQuery({ terms: searchTerms }));
+						}}
+					>
 						Buscar
 					</Button>
 				</div>
@@ -222,12 +234,23 @@ export function Search() {
 			</Form>
 
 			{query ? (
-				<div className="max-w-[600px]">
-					<SearchResults query={query} />
-				</div>
-			) : (
-				""
-			)}
+				<>
+					<div className="text-sm text-right max-w-prose w-full">
+						<a
+							href={`https://bsky.app/search?q=${query}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center gap-1"
+						>
+							Abrir no Bsky.app
+							<ExternalLinkIcon className="w-3 h-3" />
+						</a>
+					</div>
+					<div className="max-w-prose">
+						<SearchResults query={query} />
+					</div>
+				</>
+			) : null}
 
 			<Drawer open={isRoot === null}>
 				<Outlet />

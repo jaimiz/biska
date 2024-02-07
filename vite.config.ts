@@ -56,7 +56,11 @@ export default defineConfig({
         plugins: [jotaiDebugLabel, jotaiReactRefresh],
       },
     }),
-    VitePWA({ registerType: "prompt", devOptions: { enabled: true } }),
+    VitePWA({
+      registerType: "prompt",
+      devOptions: { enabled: true },
+      selfDestroying: true,
+    }),
     eslintPlugin(),
     checkerPlugin({
       typescript: true,

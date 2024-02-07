@@ -24,8 +24,7 @@ type AutocompleteProps = {
 export function AutocompleteUsers(props: AutocompleteProps) {
 	const queryAutocomplete = useActorAutocompleteFn();
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(props.value ?? "");
-	const [query, setQuery] = useState("");
+	const [query, setQuery] = useState(props.value ?? "");
 	const [options, setOptions] = useState<
 		Array<{ value: string; label: string }>
 	>([]);
@@ -60,7 +59,7 @@ export function AutocompleteUsers(props: AutocompleteProps) {
 					aria-expanded={open}
 					className="w-[200px] justify-between"
 				>
-					{value ? value : "Procurar usuário…"}
+					{query ? query : "Procurar usuário…"}
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
@@ -79,9 +78,9 @@ export function AutocompleteUsers(props: AutocompleteProps) {
 								key={option.value}
 								value={option.value}
 								onSelect={(currentValue) => {
-									setValue(currentValue === value ? "" : currentValue);
+									setQuery(currentValue === query ? "" : currentValue);
 									if (props.onSelect) {
-										props.onSelect(currentValue === value ? "" : currentValue);
+										props.onSelect(currentValue === query ? "" : currentValue);
 									}
 									setOpen(false);
 								}}
@@ -89,7 +88,7 @@ export function AutocompleteUsers(props: AutocompleteProps) {
 								<Check
 									className={cn(
 										"mr-2 h-4 w-4",
-										value === option.value ? "opacity-100" : "opacity-0",
+										query === option.value ? "opacity-100" : "opacity-0",
 									)}
 								/>
 								{option.label}
