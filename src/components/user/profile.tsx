@@ -1,4 +1,5 @@
 import { isBlockedByError, isBlockingError } from "@/lib/errors";
+import { cn } from "@/lib/utils";
 import {
 	AuthorFeedFilters,
 	useProfilePosts,
@@ -7,14 +8,26 @@ import {
 import { Did } from "@/state/schema";
 import { RichText as RichTextAPI } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import {
+	Ban,
+	User2,
+	UserCheck2,
+	UserMinus2,
+	UserPlus2,
+	UserX2,
+	Users2,
+} from "lucide-react";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Post } from "../feed/post";
 import { RichText } from "../text";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { UserAvatar } from "./avatar";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { UserAvatar } from "./avatar";
+import { MessageSquareX } from "lucide-react";
 
 export function Profile() {
 	const { handleOrDid } = useParams();
@@ -32,24 +45,81 @@ export function Profile() {
 	return !isLoading && profile && <ProfileSheet profile={profile} />;
 }
 
+function ProfileFollowBadge({ profile }: { profile: ProfileViewDetailed }) {
+	let message = null;
+	let icon = null;
+	const { blockedBy, blocking, followedBy, following } = profile.viewer ?? {};
+	if (
+		profile.labels?.some((label) => {
+			return label.src === profile.did;
+		})
+	) {
+		message = "Você!";
+		icon = <User2 />;
+	} else if (blocking && blockedBy) {
+		message = "Mutualmente Bloqueados";
+		icon = <Ban />;
+	} else if (blocking) {
+		message = "Você bloqueou";
+		icon = <UserMinus2 />;
+	} else if (blockedBy) {
+		message = "Você está bloqueado";
+		icon = <UserX2 />;
+	} else if (following && followedBy) {
+		message = "Mutuals";
+		icon = <Users2 />;
+	} else if (following) {
+		message = "Você segue";
+		icon = <UserCheck2 />;
+	} else if (followedBy) {
+		message = "Segue você";
+		icon = <UserPlus2 />;
+	}
+	if (message && icon) {
+		return (
+			<Badge className="inline-flex gap-1 itemx-center">
+				{icon} {message}
+			</Badge>
+		);
+	}
+	return null;
+}
+
+function modIsBlocked(viewer: ProfileViewDetailed["viewer"]) {
+	return viewer?.blockedBy || viewer?.blocking;
+}
+
+function modIsMuted(viewer: ProfileViewDetailed["viewer"]) {
+	return viewer?.muted || viewer?.mutedByList;
+}
+
 export function ProfileSheet({ profile }: { profile: ProfileViewDetailed }) {
 	const descriptionRT = useMemo(() => {
 		return new RichTextAPI({
 			text: profile?.description ?? "",
 		});
 	}, [profile]);
+	const shouldBlurProfile = modIsBlocked(profile.viewer);
+	const isMuted = modIsMuted(profile.viewer);
 	return (
 		<section className="relative transition-all">
 			<div className="w-full h-min transition-all overflow-hidden group shadow-lg">
 				<img
 					alt={profile.displayName ?? profile.handle}
-					className="object-cover w-full"
+					className={cn("object-cover w-full", {
+						blur: shouldBlurProfile,
+					})}
 					src={profile.banner}
 				/>
 			</div>
 			<div className="absolute transform -translate-y-1/2 w-full flex justify-end transition-all px-10">
 				<UserAvatar
-					className="w-24 h-24 border-4 border-white shadow-lg text-4xl expanded:w-32 expanded:h-32 transition-all"
+					className={cn(
+						"w-24 h-24 border-4 border-white shadow-lg text-4xl expanded:w-32 expanded:h-32 transition-all",
+						{
+							blur: shouldBlurProfile,
+						},
+					)}
 					profile={profile}
 				/>
 			</div>
@@ -58,45 +128,60 @@ export function ProfileSheet({ profile }: { profile: ProfileViewDetailed }) {
 					<h1 className="text-2xl font-bold">{profile.displayName}</h1>
 				)}
 				<p className="text-zinc-500 mt-2">@{profile.handle}</p>
+				<ProfileFollowBadge profile={profile} />
 			</div>
-			<div className="mt-6 flex space-x-4 justify-end px-10">
-				<div className="flex space-x-6">
-					<div>
-						<p className="text-2xl font-bold">{profile.postsCount}</p>
-						<p className="text-zinc-500">Posts</p>
+			{!shouldBlurProfile && (
+				<>
+					<div className="mt-6 flex space-x-4 justify-end px-10">
+						<div className="flex space-x-6">
+							<div>
+								<p className="text-2xl font-bold">{profile.postsCount}</p>
+								<p className="text-zinc-500">Posts</p>
+							</div>
+							<div>
+								<p className="text-2xl font-bold">{profile.followersCount}</p>
+								<p className="text-zinc-500">Followers</p>
+							</div>
+							<div>
+								<p className="text-2xl font-bold">{profile.followsCount}</p>
+								<p className="text-zinc-500">Following</p>
+							</div>
+						</div>
 					</div>
-					<div>
-						<p className="text-2xl font-bold">{profile.followersCount}</p>
-						<p className="text-zinc-500">Followers</p>
+					<div className="mt-6 px-10">
+						<RichText
+							className="text-zinc-500 text-right"
+							richText={descriptionRT}
+						/>
 					</div>
-					<div>
-						<p className="text-2xl font-bold">{profile.followsCount}</p>
-						<p className="text-zinc-500">Following</p>
-					</div>
-				</div>
-			</div>
-			<div className="mt-6 px-10">
-				<RichText
-					className="text-zinc-500 text-right"
-					richText={descriptionRT}
-				/>
-			</div>
-			<Tabs defaultValue="posts_no_replies">
-				<TabsList>
-					<TabsTrigger value="posts_no_replies">Posts</TabsTrigger>
-					<TabsTrigger value="posts_with_replies">Posts & Replies</TabsTrigger>
-					<TabsTrigger value="posts_with_media">Media</TabsTrigger>
-				</TabsList>
-				<TabsContent value="posts_no_replies">
-					<PostsTab did={profile.did} />
-				</TabsContent>
-				<TabsContent value="posts_with_replies">
-					<PostsTab did={profile.did} filter="posts_with_replies" />
-				</TabsContent>
-				<TabsContent value="posts_with_media">
-					<PostsTab filter="posts_with_media" did={profile.did} />
-				</TabsContent>
-			</Tabs>
+					{isMuted && (
+						<div className="p-4">
+							<Alert className="flex items-center">
+								<MessageSquareX />
+								<AlertDescription>Você mutou esse usuário</AlertDescription>
+							</Alert>
+						</div>
+					)}
+					<Tabs defaultValue="posts_no_replies">
+						<TabsList>
+							<TabsTrigger value="posts_no_replies">Posts</TabsTrigger>
+							<TabsTrigger value="posts_with_replies">
+								Posts & Replies
+							</TabsTrigger>
+							<TabsTrigger value="posts_with_media">Media</TabsTrigger>
+						</TabsList>
+						<TabsContent value="posts_no_replies">
+							<PostsTab did={profile.did} />
+						</TabsContent>
+						<TabsContent value="posts_with_replies">
+							<PostsTab did={profile.did} filter="posts_with_replies" />
+						</TabsContent>
+						<TabsContent value="posts_with_media">
+							<PostsTab filter="posts_with_media" did={profile.did} />
+						</TabsContent>
+					</Tabs>
+				</>
+			)}
 		</section>
 	);
 }
