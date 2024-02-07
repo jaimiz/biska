@@ -10,12 +10,13 @@ import { RichText as RichTextAPI } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import {
 	Ban,
-	User2,
-	UserCheck2,
-	UserMinus2,
-	UserPlus2,
-	UserX2,
-	Users2,
+	MessageSquareX,
+	UserRound,
+	UserRoundCheck,
+	UserRoundMinus,
+	UserRoundPlus,
+	UserRoundX,
+	UsersRound,
 } from "lucide-react";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -27,7 +28,6 @@ import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { UserAvatar } from "./avatar";
-import { MessageSquareX } from "lucide-react";
 
 export function Profile() {
 	const { handleOrDid } = useParams();
@@ -49,31 +49,34 @@ function ProfileFollowBadge({ profile }: { profile: ProfileViewDetailed }) {
 	let message = null;
 	let icon = null;
 	const { blockedBy, blocking, followedBy, following } = profile.viewer ?? {};
+	console.log("labels", profile);
 	if (
 		profile.labels?.some((label) => {
 			return label.src === profile.did;
-		})
+		}) &&
+		!profile.viewer?.following &&
+		!profile.viewer?.followedBy
 	) {
 		message = "Você!";
-		icon = <User2 />;
+		icon = <UserRound />;
 	} else if (blocking && blockedBy) {
 		message = "Mutualmente Bloqueados";
 		icon = <Ban />;
 	} else if (blocking) {
 		message = "Você bloqueou";
-		icon = <UserMinus2 />;
+		icon = <UserRoundMinus />;
 	} else if (blockedBy) {
 		message = "Você está bloqueado";
-		icon = <UserX2 />;
+		icon = <UserRoundX />;
 	} else if (following && followedBy) {
 		message = "Mutuals";
-		icon = <Users2 />;
+		icon = <UsersRound />;
 	} else if (following) {
 		message = "Você segue";
-		icon = <UserCheck2 />;
+		icon = <UserRoundCheck />;
 	} else if (followedBy) {
 		message = "Segue você";
-		icon = <UserPlus2 />;
+		icon = <UserRoundPlus />;
 	}
 	if (message && icon) {
 		return (
