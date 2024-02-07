@@ -13,6 +13,8 @@ import { Post } from "../feed/post";
 import { RichText } from "../text";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { UserAvatar } from "./avatar";
+import { Button } from "../ui/button";
+import { Spinner } from "../ui/spinner";
 
 export function Profile() {
 	const { handleOrDid } = useParams();
@@ -102,7 +104,10 @@ export function ProfileSheet({ profile }: { profile: ProfileViewDetailed }) {
 function PostsTab({
 	did,
 	filter = "posts_no_replies",
-}: { did?: string; filter?: AuthorFeedFilters }) {
+}: {
+	did?: string;
+	filter?: AuthorFeedFilters;
+}) {
 	// Load user posts
 	const { profilePostsQuery: timelineQuery, profilePostsData: timelineData } =
 		useProfilePosts(did, filter);
@@ -117,7 +122,8 @@ function PostsTab({
 		if (isBlockedByError(timelineQuery.error)) return "Você está bloqueado";
 		return "Erro ao carregar posts";
 	}
-	return timelineData.map((timelineEntry) => {
+	const { fetchNextPage, isFetching, hasNextPage } = timelineQuery;
+	const posts = timelineData.map((timelineEntry) => {
 		return (
 			<Post
 				post={timelineEntry.post}
@@ -127,4 +133,37 @@ function PostsTab({
 			/>
 		);
 	});
+	return (
+		<div className="flex flex-col items-center max-w-full">
+			<div className="max-w-full">{posts}</div>
+			{hasNextPage && (
+				<div className="py-5">
+					<Button
+						disabled={isFetching}
+						className="gap-2"
+						onClick={() => {
+							if (!isFetching) {
+								fetchNextPage();
+							}
+						}}
+					>
+						{isFetching ? (
+							<>
+								<Spinner /> Carregando…
+							</>
+						) : (
+							"Carregar mais posts"
+						)}
+					</Button>
+				</div>
+			)}
+			{!hasNextPage && (
+				<div className="w-full relative flex py-5 px-32 items-center text-purple-300">
+					<div className="flex-grow border-t border-current" />
+					<span className="flex-shrink mx-2 text-current">fim</span>
+					<div className="flex-grow border-t border-current" />
+				</div>
+			)}
+		</div>
+	);
 }
