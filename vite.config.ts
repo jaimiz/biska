@@ -10,60 +10,86 @@ import checkerPlugin from "vite-plugin-checker";
 
 const vercelEnv = process.env.VERCEL_ENV ?? false;
 const isProduction = vercelEnv
-  ? vercelEnv === "production"
-  : process.env.NODE_ENV === "production";
+	? vercelEnv === "production"
+	: process.env.NODE_ENV === "production";
 
 const vercelPreviewVersion = process.env.VERCEL_GIT_COMMIT_SHA
-  ? `${
-      process.env.npm_package_version
-    } (${process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 8)})`
-  : process.env.npm_package_version;
+	? `${
+			process.env.npm_package_version
+	  } (${process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 8)})`
+	: process.env.npm_package_version;
 
 const productionVersion = isProduction
-  ? process.env.npm_package_version
-  : vercelPreviewVersion;
+	? process.env.npm_package_version
+	: vercelPreviewVersion;
+
+const getVersionObject = async () => {
+	if (vercelEnv) {
+		return {
+			commit: process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 8),
+			version: vercelPreviewVersion,
+		};
+	}
+	if (isProduction) {
+		return {
+			version: process.env.npm_package_version,
+		};
+	}
+
+	return import("child_process").then((child_process) => {
+		const gitSha = child_process
+			.execSync("git rev-parse --short HEAD")
+			.toString()
+			.trim();
+		return {
+			commit: gitSha,
+			version: productionVersion,
+		};
+	});
+};
 
 const getVersion = async () => {
-  if (vercelEnv) {
-    return vercelPreviewVersion;
-  }
-  if (isProduction) {
-    return process.env.npm_package_version;
-  }
+	if (vercelEnv) {
+		return vercelPreviewVersion;
+	}
+	if (isProduction) {
+		return process.env.npm_package_version;
+	}
 
-  return import("child_process").then((child_process) => {
-    const gitSha = child_process
-      .execSync("git rev-parse --short HEAD")
-      .toString()
-      .trim();
-    return `${productionVersion} (${gitSha})`;
-  });
+	return import("child_process").then((child_process) => {
+		const gitSha = child_process
+			.execSync("git rev-parse --short HEAD")
+			.toString()
+			.trim();
+		return `${productionVersion} (${gitSha})`;
+	});
 };
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  server: {
-    port: 3000,
-  },
-  define: {
-    BISKA_VERSION: JSON.stringify(await getVersion()),
-  },
-  plugins: [
-    pluginRewriteAll(),
-    tsconfigPaths(),
-    react({
-      babel: {
-        plugins: [jotaiDebugLabel, jotaiReactRefresh],
-      },
-    }),
-    VitePWA({
-      registerType: "prompt",
-      devOptions: { enabled: true },
-      selfDestroying: true,
-    }),
-    eslintPlugin(),
-    checkerPlugin({
-      typescript: true,
-    }),
-  ],
+	server: {
+		port: 3000,
+	},
+	define: {
+		BISKA_VERSION: JSON.stringify(await getVersion()),
+		BISKA_VERSION_OBJECT: await getVersionObject(),
+	},
+	plugins: [
+		pluginRewriteAll(),
+		tsconfigPaths(),
+		react({
+			babel: {
+				plugins: [jotaiDebugLabel, jotaiReactRefresh],
+			},
+		}),
+		VitePWA({
+			registerType: "prompt",
+			devOptions: { enabled: true },
+			selfDestroying: true,
+		}),
+		eslintPlugin(),
+		checkerPlugin({
+			typescript: true,
+		}),
+	],
 });

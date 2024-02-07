@@ -257,7 +257,14 @@ export function Search() {
 			</Drawer>
 
 			<div className="flex self-center mt-auto text-xs text-purple-300">
-				versão {BISKA_VERSION}
+				versão{" "}
+				<a
+					target="_blank"
+					rel="noopener noreferrer"
+					href={`https://github.com/jaimiz/biska/commit/${BISKA_VERSION_OBJECT.commit}`}
+				>
+					{BISKA_VERSION}
+				</a>
 			</div>
 		</div>
 	);
