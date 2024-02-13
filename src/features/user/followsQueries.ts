@@ -2,26 +2,28 @@ import { getAgent } from "@/services/api";
 import { AppBskyActorDefs } from "@atproto/api";
 import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
-import { STALE } from ".";
-import { currentAccountAtom } from "../atoms/session";
+import { currentAccountAtom } from "./sessionAtoms";
+import { STALE } from "@/lib/queries";
 
 // sanity limit is SANITY_PAGE_LIMIT*PAGE_SIZE total records
 const SANITY_PAGE_LIMIT = 1000;
 const PAGE_SIZE = 100;
 // ...which comes 10,000k follows
 
-export const RQKEY = () => ["my-follows"];
+const myfollowsKeys = {
+	all: ["myfollows"] as const,
+};
 
 export function useMyFollowsQuery() {
 	const currentAccount = useAtomValue(currentAccountAtom);
 	return useQuery<AppBskyActorDefs.ProfileViewBasic[]>({
 		staleTime: STALE.MINUTES.ONE,
-		queryKey: RQKEY(),
+		queryKey: myfollowsKeys.all,
 		async queryFn() {
 			if (!currentAccount) {
 				return [];
 			}
-			let cursor;
+			let cursor: string | undefined = undefined;
 			let arr: AppBskyActorDefs.ProfileViewBasic[] = [];
 			for (let i = 0; i < SANITY_PAGE_LIMIT; i++) {
 				const res = await getAgent().getFollows({

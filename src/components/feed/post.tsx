@@ -1,10 +1,7 @@
 import { makeHandleLink } from "@/lib/strings/handle";
 import { cn } from "@/lib/utils";
 import { Did } from "@/state/schema";
-import {
-	useProfileQuery,
-	type SkylineSliceItem,
-} from "@/state/queries/profile";
+
 import {
 	AppBskyEmbedExternal,
 	AppBskyEmbedImages,
@@ -26,6 +23,10 @@ import { TimeElapsed } from "../text/time-elapsed";
 import { UserAvatar } from "../user/avatar";
 import { ProfileDisplayName } from "../user/profile-display-name";
 import { PostControls } from "./post-controls";
+import {
+	SkylineSliceItem,
+	useProfileQuery,
+} from "@/features/user/profileQueries";
 
 type PostProps = SkylineSliceItem;
 export function Post({ post, record }: PostProps) {

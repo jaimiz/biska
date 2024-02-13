@@ -1,16 +1,15 @@
-import { columnsAtom } from "@/state/atoms/columns";
 import { useAtom, useAtomValue } from "jotai";
 import { Outlet } from "react-router-dom";
 import { DeckColumn } from "./column";
 import { Drawer } from "./drawer";
-import { PersistedAccount } from "@/state/schema";
-import { currentAccountAtom } from "@/state/atoms/session";
+import { requireAccountAtom } from "@/features/user/sessionAtoms";
+import { columnsAtom } from "@/features/dashboard/columns";
 
 export type DeckProps = {
 	openDrawer?: boolean;
 };
 export function Deck(props: DeckProps) {
-	const currentAccount = useAtomValue(currentAccountAtom) as PersistedAccount;
+	const currentAccount = useAtomValue(requireAccountAtom);
 	const [columns, setColumns] = useAtom(columnsAtom);
 	if (!columns.length) {
 		setColumns([

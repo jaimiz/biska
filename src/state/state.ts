@@ -1,5 +1,4 @@
-import { getDefaultStore } from "jotai";
-import { atomWithProxy } from "jotai-valtio";
+import { atom, getDefaultStore } from "jotai";
 import * as localforage from "localforage";
 import {
 	AppSchema,
@@ -7,11 +6,9 @@ import {
 	StorageSchemaKey,
 	defaultAppSchema,
 } from "./schema.ts";
-import { proxy } from "valtio";
 
 export const atomStore = getDefaultStore();
-export const state = proxy(defaultAppSchema);
-export const appStateAtom = atomWithProxy(state, { sync: true });
+export const appStateAtom = atom(defaultAppSchema);
 
 export const initializeStoredState = (state: StorageSchema | undefined) => {
 	return {

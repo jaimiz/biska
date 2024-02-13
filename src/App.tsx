@@ -9,11 +9,14 @@ import { Toaster } from "./components/ui/sonner";
 import { Spinner } from "./components/ui/spinner";
 import { Profile } from "./components/user/profile";
 import { queryClient } from "./lib/react-query";
-import { Search } from "./routes/guarded/search";
 import { bskyApi } from "./services/api";
-import { currentAccountAtom, sessionStateAtom } from "./state/atoms/session";
-import { TimeTickProvider } from "./state/clock";
 import { persisted } from "./state/state";
+import { Search } from "./features/search/page";
+import { TimeTickProvider } from "./lib/clock";
+import {
+	currentAccountAtom,
+	sessionStateAtom,
+} from "./features/user/sessionAtoms";
 
 function LoadingScreen() {
 	return (

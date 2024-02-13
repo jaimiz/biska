@@ -1,5 +1,5 @@
+import { behaviorPreferencesAtom } from "@/features/preferences/atoms";
 import { cn } from "@/lib/utils";
-import { behaviorPreferencesAtom } from "@/state/atoms/preferences";
 import { useAtomValue } from "jotai";
 import { RefAttributes } from "react";
 import {

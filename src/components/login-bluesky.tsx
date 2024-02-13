@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { BSKY_SOCIAL_SERVICE } from "@/state/queries";
 import { Cloud } from "lucide-react";
 import { useState } from "react";
 import {
@@ -19,7 +18,7 @@ import { AlertCircle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Spinner } from "./ui/spinner";
-import { bskyApi } from "@/services/api";
+import { BSKY_SOCIAL_SERVICE, bskyApi } from "@/services/api";
 
 export function AlertDestructive() {
 	return (
@@ -109,7 +108,13 @@ h-10 rounded-md border border-input bg-background text-sm ring-offset-background
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="password">Password</Label>
-							<Input name="password" id="password" required type="password" />
+							<Input
+								name="password"
+								id="password"
+								required
+								type="password"
+								autoComplete="current-password"
+							/>
 						</div>
 						{error && (
 							<div>

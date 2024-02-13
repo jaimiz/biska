@@ -1,10 +1,6 @@
 import { isBlockedByError, isBlockingError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
-import {
-	AuthorFeedFilters,
-	useProfilePosts,
-	useProfileQuery,
-} from "@/state/queries/profile";
+
 import { Did } from "@/state/schema";
 import { RichText as RichTextAPI } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
@@ -28,6 +24,11 @@ import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { UserAvatar } from "./avatar";
+import {
+	AuthorFeedFilters,
+	useProfilePosts,
+	useProfileQuery,
+} from "@/features/user/profileQueries";
 
 export function Profile() {
 	const { handleOrDid } = useParams();
@@ -193,7 +194,7 @@ function PostsTab({
 	did,
 	filter = "posts_no_replies",
 }: {
-	did?: string;
+	did: string;
 	filter?: AuthorFeedFilters;
 }) {
 	// Load user posts

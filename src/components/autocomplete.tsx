@@ -14,8 +14,9 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { useActorAutocompleteFn } from "@/state/queries/autocomplete";
+
 import { useEffect, useState } from "react";
+import { useActorAutocompleteFn } from "@/features/user/autocompleteQueries";
 
 type AutocompleteProps = {
 	onSelect?: (value: string) => void;
@@ -48,7 +49,7 @@ export function AutocompleteUsers(props: AutocompleteProps) {
 			);
 		}
 		runQuery();
-	}, [query]);
+	}, [query, queryAutocomplete]);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>

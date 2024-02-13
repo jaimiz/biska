@@ -1,7 +1,12 @@
-import { PUBLIC_BSKY_AGENT } from "@/state/queries";
 import type { Did, PersistedAccount, Session } from "@/state/schema";
-import { state, persisted } from "@/state/state";
+import { appStateAtom, atomStore, persisted } from "@/state/state";
 import { AtpPersistSessionHandler, BskyAgent } from "@atproto/api";
+
+export const PUBLIC_BSKY_AGENT = new BskyAgent({
+	service: "https://api.bsky.app",
+});
+
+export const BSKY_SOCIAL_SERVICE = "https://bsky.social";
 
 let __currentAgent: BskyAgent = PUBLIC_BSKY_AGENT;
 
@@ -23,6 +28,7 @@ export type ApiMethods = {
 };
 
 export function setSessionAndPersist(fn: (prev: Session) => Session) {
+	const state = atomStore.get(appStateAtom);
 	const prev = state.session;
 	state.session = fn(prev);
 	persisted.write("session", state.session);
@@ -30,6 +36,7 @@ export function setSessionAndPersist(fn: (prev: Session) => Session) {
 }
 
 export function setSession(fn: (prev: Session) => Session) {
+	const state = atomStore.get(appStateAtom);
 	const prev = state.session;
 	persisted.write("session", fn(prev));
 	return state.session;
@@ -174,7 +181,16 @@ const resumeSession: ApiMethods["resumeSession"] = async (account) => {
 		setSession((session) => ({
 			...session,
 		}));
-		state.sessionState.isInitialLoad = false;
+		atomStore.set(appStateAtom, (prevState) => {
+			const prevSession = prevState.sessionState;
+			return {
+				...prevState,
+				sessionState: {
+					...prevSession,
+					isInitialLoad: false,
+				},
+			};
+		});
 	}
 };
 

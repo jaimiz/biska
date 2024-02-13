@@ -1,20 +1,30 @@
+import { isBlockedByError, isBlockingError } from "@/lib/errors";
+import { getAgent } from "@/services/api";
+import { Did } from "@/state/schema";
 import {
 	AppBskyFeedDefs,
 	AppBskyFeedGetAuthorFeed,
 	AppBskyFeedPost,
 } from "@atproto/api";
+import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { Did } from "../schema";
-import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { isBlockedByError, isBlockingError } from "@/lib/errors";
-import { getAgent } from "@/services/api";
 
 export const RQKEY = (did?: Did) => ["profile", did ?? ""];
 
-export function useProfileQuery({ did }: { did: Did | undefined }) {
+export const profileKeys = {
+	all: ["profile"] as const,
+	details: () => [...profileKeys.all, "detail"],
+	detail: (did: Did) => [...profileKeys.details(), did] as const,
+	feeds: () => [...profileKeys.all, "feeds"] as const,
+	actorFeeds: (actor: string) => [...profileKeys.feeds(), actor] as const,
+	actorFeed: (actor: string, filter: AuthorFeedFilters) =>
+		[...profileKeys.actorFeeds(actor), filter] as const,
+};
+
+export function useProfileQuery({ did }: { did: Did }) {
 	return useQuery({
-		queryKey: RQKEY(did),
+		queryKey: profileKeys.detail(did),
 		queryFn: async () => {
 			const res = await getAgent().getProfile({ actor: did ?? "" });
 			return res.data as ProfileViewDetailed;
@@ -32,15 +42,9 @@ export type SkylineSliceItem = {
 export type AuthorFeedFilters = AppBskyFeedGetAuthorFeed.QueryParams["filter"];
 
 export const useProfilePosts = (
-	handle?: string,
+	actor: string,
 	filter: AuthorFeedFilters = "posts_no_replies",
 ) => {
-	const agent = getAgent();
-
-	const actor = handle ?? agent.session?.did;
-
-	if (!actor) throw new Error("Not logged in");
-
 	const profilePostsQuery = useInfiniteQuery<{
 		cursor?: string;
 		feed: AppBskyFeedDefs.FeedViewPost[];
@@ -48,7 +52,7 @@ export const useProfilePosts = (
 		getNextPageParam: (lastPage) => lastPage.cursor,
 		getPreviousPageParam: (firstPage) => firstPage.cursor,
 		initialPageParam: undefined,
-		queryKey: ["profile", actor, "feed", filter],
+		queryKey: profileKeys.actorFeed(actor, filter),
 		queryFn: async ({ pageParam }) => {
 			const res = await getAgent().getAuthorFeed({
 				actor,

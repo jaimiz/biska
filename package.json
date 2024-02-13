@@ -26,7 +26,7 @@
 		"clsx": "2.0.0",
 		"cmdk": "0.2.0",
 		"jotai": "2.5.1",
-		"jotai-valtio": "0.4.0",
+		"jotai-optics": "0.3.2",
 		"localforage": "1.10.0",
 		"lucide-react": "0.323.0",
 		"next-themes": "0.2.1",
@@ -36,7 +36,6 @@
 		"sonner": "1.4.0",
 		"tailwind-merge": "2.0.0",
 		"tailwindcss-animate": "1.0.7",
-		"valtio": "1.13.0",
 		"zod": "3.22.4"
 	},
 	"devDependencies": {

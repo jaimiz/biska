@@ -1,6 +1,6 @@
+import { Session } from "@/state/schema";
+import { appStateAtom, persisted } from "@/state/state";
 import { atom } from "jotai";
-import { Session } from "../schema";
-import { appStateAtom, persisted } from "../state";
 
 type SessionState = {
 	isInitialLoad: boolean;
@@ -34,4 +34,12 @@ export const sessionAtom = atom(
 
 export const currentAccountAtom = atom((get) => {
 	return get(sessionAtom).currentAccount;
+});
+
+export const requireAccountAtom = atom((get) => {
+	const account = get(sessionAtom).currentAccount;
+	if (!account) {
+		throw new Error("User not logged in");
+	}
+	return account;
 });

@@ -1,11 +1,11 @@
-import { cn } from "@/lib/utils";
 import {
 	usePostLikeMutation,
 	usePostRepostMutation,
 	usePostUnlikeMutation,
 	usePostUnrepostMutation,
-} from "@/state/queries/post";
-import { SkylineSliceItem } from "@/state/queries/profile";
+} from "@/features/posts/queries";
+import { SkylineSliceItem } from "@/features/user/profileQueries";
+import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
 import {
 	LucideIcon,
@@ -45,9 +45,9 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 	const [repostCount, setRepostCount] = useState(post.repostCount ?? 0);
 	const [likeCount, setLikeCount] = useState(post.likeCount ?? 0);
 	const repost = usePostRepostMutation();
-	const like = usePostLikeMutation();
+	const like = usePostLikeMutation(post);
 	const unrepost = usePostUnrepostMutation();
-	const unlike = usePostUnlikeMutation();
+	const unlike = usePostUnlikeMutation(post);
 	return (
 		<>
 			<button type="button" className="flex hover:text-blue-500">

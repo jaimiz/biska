@@ -16,16 +16,15 @@ import { TextButton } from "@/components/ui/text-button";
 import { ProfileDisplayName } from "@/components/user/profile-display-name";
 import { buildSearchQuery, parseSearchQuery } from "@/lib/search-parser";
 import { bskyApi } from "@/services/api";
-import { behaviorPreferencesAtom } from "@/state/atoms/preferences";
-import { currentAccountAtom } from "@/state/atoms/session";
-import { useProfileQuery } from "@/state/queries/profile";
-import { useSearchPostsQuery } from "@/state/queries/search";
-import { AppBskyFeedPost } from "@atproto/api";
-import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import { AppBskyActorDefs, AppBskyFeedPost } from "@atproto/api";
 import { useAtom, useAtomValue } from "jotai";
 import { ExternalLinkIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Form, Outlet, useMatch, useSearchParams } from "react-router-dom";
+import { useSearchPostsQuery } from "./queries";
+import { requireAccountAtom } from "../user/sessionAtoms";
+import { useProfileQuery } from "../user/profileQueries";
+import { behaviorPreferencesAtom } from "../preferences/atoms";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
@@ -84,8 +83,8 @@ function SearchResults({ query }: { query: string }) {
 }
 
 export function Search() {
-	const currentUser = useAtomValue(currentAccountAtom);
-	const currentUserProfile = useProfileQuery({ did: currentUser?.did });
+	const currentUser = useAtomValue(requireAccountAtom);
+	const currentUserProfile = useProfileQuery({ did: currentUser.did });
 	const [searchTerms, setSearchTerms] = useState("");
 	const [query, setQuery] = useState("");
 	const [searchType, setSearchType] = useState<"all" | "me" | "user">("all");
@@ -129,7 +128,9 @@ export function Search() {
 					Logado como{" "}
 					<ProfileDisplayName
 						className="inline-flex"
-						profile={currentUserProfile.data as ProfileViewDetailed}
+						profile={
+							currentUserProfile.data as AppBskyActorDefs.ProfileViewDetailed
+						}
 					/>{" "}
 					&middot; <PreferencesDrawer /> |
 					<button

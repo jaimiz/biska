@@ -1,6 +1,6 @@
+import { Preferences } from "@/state/schema";
+import { appStateAtom, persisted } from "@/state/state";
 import { atom } from "jotai";
-import { Preferences } from "../schema";
-import { appStateAtom, persisted } from "../state";
 
 export const preferencesAtom = atom(
 	(get) => {

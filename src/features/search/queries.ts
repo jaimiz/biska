@@ -1,15 +1,12 @@
 import { getAgent } from "@/services/api";
 import { AppBskyFeedSearchPosts } from "@atproto/api";
 import {
-	QueryKey,
 	InfiniteData,
+	QueryKey,
 	useInfiniteQuery,
 } from "@tanstack/react-query";
-
-const searchPostsQueryKey = ({ query }: { query: string }) => [
-	"search-posts",
-	query,
-];
+import { updatePostAtom } from "../posts/atoms";
+import { postKeys } from "../posts/queries";
 
 export function useSearchPostsQuery({ query }: { query: string }) {
 	return useInfiniteQuery<
@@ -19,13 +16,18 @@ export function useSearchPostsQuery({ query }: { query: string }) {
 		QueryKey,
 		string | undefined
 	>({
-		queryKey: searchPostsQueryKey({ query }),
+		queryKey: postKeys.search(query),
 		queryFn: async ({ pageParam }) => {
 			const res = await getAgent().app.bsky.feed.searchPosts({
 				q: query,
 				limit: 25,
 				cursor: pageParam,
 			});
+			if (res.data.posts.length > 0) {
+				for (const post of res.data.posts) {
+					updatePostAtom(post.cid, post);
+				}
+			}
 			return res.data;
 		},
 		initialPageParam: undefined,

@@ -1,19 +1,28 @@
 import { isInvalidHandle } from "@/lib/strings/handle";
-import { AppBskyActorDefs } from "@atproto/api";
+import {
+	AppBskyActorDefs,
+	AppBskyActorSearchActorsTypeahead,
+} from "@atproto/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { STALE } from ".";
-import { useMyFollowsQuery } from "./my-follows";
 import { getAgent } from "@/services/api";
+import { useMyFollowsQuery } from "./followsQueries";
+import { STALE } from "@/lib/queries";
 
 export const RQKEY = (prefix: string) => ["actor-autocomplete", prefix];
+
+const autocompleteKeys = {
+	all: ["autocomplete"] as const,
+	prefixes: () => [...autocompleteKeys.all, "actor"] as const,
+	prefix: (prefix: string) => [...autocompleteKeys.prefixes(), prefix] as const,
+};
 
 export function useActorAutocompleteQuery(prefix: string) {
 	const { data: follows, isFetching } = useMyFollowsQuery();
 
 	return useQuery<AppBskyActorDefs.ProfileViewBasic[]>({
 		staleTime: STALE.MINUTES.ONE,
-		queryKey: RQKEY(prefix || ""),
+		queryKey: autocompleteKeys.prefix(prefix),
 		async queryFn() {
 			const res = prefix
 				? await getAgent().searchActorsTypeahead({
@@ -40,12 +49,13 @@ export function useActorAutocompleteFn() {
 
 	return React.useCallback(
 		async ({ query, limit = 8 }: { query: string; limit?: number }) => {
-			let res;
+			let res: AppBskyActorSearchActorsTypeahead.Response | undefined =
+				undefined;
 			if (query) {
 				try {
 					res = await queryClient.fetchQuery({
 						staleTime: STALE.MINUTES.ONE,
-						queryKey: RQKEY(query || ""),
+						queryKey: autocompleteKeys.prefix(query),
 						queryFn: () =>
 							getAgent().searchActorsTypeahead({
 								term: query,
