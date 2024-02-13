@@ -33,7 +33,7 @@ const preferencesSchema = z.object({
 		profilePictureStyle: z.enum(["round", "square"]).default("square"),
 	}),
 	behavior: z.object({
-		openProfileIn: z.enum(["app", "bsky"]).default("bsky"),
+		openProfileIn: z.enum(["app", "bsky"]).default("app"),
 	}),
 });
 
