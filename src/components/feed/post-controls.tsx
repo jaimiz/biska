@@ -1,3 +1,4 @@
+import { postsFamily } from "@/features/posts/atoms";
 import {
 	usePostLikeMutation,
 	usePostRepostMutation,
@@ -7,6 +8,7 @@ import {
 import { SkylineSliceItem } from "@/features/user/profileQueries";
 import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
+import { useAtomValue } from "jotai";
 import {
 	LucideIcon,
 	MessageSquareDashedIcon,
@@ -15,7 +17,6 @@ import {
 	Repeat2Icon,
 	StarIcon,
 } from "lucide-react";
-import { useState } from "react";
 
 type CounterIconProps = {
 	count?: number;
@@ -32,7 +33,8 @@ function CounterIcon({ Icon, count, className }: CounterIconProps) {
 }
 
 export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
-	const replyCount = post.replyCount ?? 0;
+	const postAtom = useAtomValue(postsFamily(post));
+	const replyCount = postAtom.replyCount ?? 0;
 	const MessagesIcon =
 		replyCount > 4
 			? MessagesSquareIcon
@@ -40,13 +42,12 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 			? MessageSquareIcon
 			: MessageSquareDashedIcon;
 
-	const [hasReposted, setHasReposted] = useState(Boolean(post.viewer?.repost));
-	const [hasLiked, setHasLiked] = useState(Boolean(post.viewer?.like));
-	const [repostCount, setRepostCount] = useState(post.repostCount ?? 0);
-	const [likeCount, setLikeCount] = useState(post.likeCount ?? 0);
-	const repost = usePostRepostMutation();
+	console.log({ postAtom });
+	const hasReposted = Boolean(postAtom.viewer?.repost);
+	const hasLiked = Boolean(postAtom.viewer?.like);
+	const repost = usePostRepostMutation(post);
 	const like = usePostLikeMutation(post);
-	const unrepost = usePostUnrepostMutation();
+	const unrepost = usePostUnrepostMutation(post);
 	const unlike = usePostUnlikeMutation(post);
 	return (
 		<>
@@ -57,21 +58,9 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 				type="button"
 				onClick={() => {
 					if (hasReposted) {
-						setHasReposted(false);
-						setRepostCount((c) => c - 1);
-						try {
-							// FIXME: If the user doesn't refresh the page, this will be null
-							// and we can't unlike/unrepost
-							// biome-ignore lint/style/noNonNullAssertion: <explanation>
-							unrepost.mutate(post.viewer!.repost as string);
-						} catch {
-							setRepostCount((c) => c + 1);
-							setHasReposted(true);
-						}
+						unrepost.mutate(postAtom.viewer?.repost as string);
 						return;
 					}
-					setRepostCount((c) => c + 1);
-					setHasReposted(true);
 					repost.mutate(post);
 				}}
 				className={cn(
@@ -80,27 +69,15 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 					!hasReposted && ["text-inherit", "hover:text-green-700"],
 				)}
 			>
-				<CounterIcon Icon={Repeat2Icon} count={repostCount} />
+				<CounterIcon Icon={Repeat2Icon} count={postAtom.repostCount} />
 			</button>
 			<button
 				type="button"
 				onClick={() => {
 					if (hasLiked) {
-						setHasLiked(false);
-						setLikeCount((c) => c - 1);
-						try {
-							// FIXME: If the user doesn't refresh the page, this will be null
-							// and we can't unlike/unrepost
-							// biome-ignore lint/style/noNonNullAssertion: <explanation>
-							unlike.mutate(post.viewer!.like as string);
-						} catch {
-							setHasLiked(true);
-							setLikeCount((c) => c + 1);
-						}
+						unlike.mutate(postAtom.viewer?.like as string);
 						return;
 					}
-					setHasLiked(true);
-					setLikeCount((c) => c + 1);
 					like.mutate(post);
 				}}
 				className={cn(
@@ -115,7 +92,7 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 						"stroke-current": hasLiked,
 					})}
 					Icon={StarIcon}
-					count={likeCount}
+					count={postAtom.likeCount}
 				/>
 			</button>
 		</>

@@ -5,7 +5,6 @@ import {
 	QueryKey,
 	useInfiniteQuery,
 } from "@tanstack/react-query";
-import { updatePostAtom } from "../posts/atoms";
 import { postKeys } from "../posts/queries";
 
 export function useSearchPostsQuery({ query }: { query: string }) {
@@ -23,11 +22,6 @@ export function useSearchPostsQuery({ query }: { query: string }) {
 				limit: 25,
 				cursor: pageParam,
 			});
-			if (res.data.posts.length > 0) {
-				for (const post of res.data.posts) {
-					updatePostAtom(post.cid, post);
-				}
-			}
 			return res.data;
 		},
 		initialPageParam: undefined,

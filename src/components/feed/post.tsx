@@ -3,6 +3,10 @@ import { cn } from "@/lib/utils";
 import { Did } from "@/state/schema";
 
 import {
+	SkylineSliceItem,
+	useProfileQuery,
+} from "@/features/user/profileQueries";
+import {
 	AppBskyEmbedExternal,
 	AppBskyEmbedImages,
 	AppBskyEmbedRecord,
@@ -23,13 +27,11 @@ import { TimeElapsed } from "../text/time-elapsed";
 import { UserAvatar } from "../user/avatar";
 import { ProfileDisplayName } from "../user/profile-display-name";
 import { PostControls } from "./post-controls";
-import {
-	SkylineSliceItem,
-	useProfileQuery,
-} from "@/features/user/profileQueries";
+import { usePostQuery } from "@/features/posts/queries";
 
 type PostProps = SkylineSliceItem;
 export function Post({ post, record }: PostProps) {
+	const { data: postData } = usePostQuery({ uri: post.uri });
 	const postText = useMemo(() => {
 		const rt = new RichTextAPI({
 			text: record.text,
@@ -37,6 +39,8 @@ export function Post({ post, record }: PostProps) {
 		rt.detectFacetsWithoutResolution();
 		return rt;
 	}, [record]);
+
+	if (!postData) return null;
 
 	return (
 		<div
@@ -59,7 +63,7 @@ export function Post({ post, record }: PostProps) {
 				{record.text ? <RichText richText={postText} /> : null}
 				{post.embed && <PostEmbed embed={post.embed} />}
 				<div className="flex justify-between">
-					<PostControls post={post} />
+					<PostControls post={postData} />
 				</div>
 			</div>
 		</div>
@@ -279,9 +283,11 @@ function MaybeQuoteEmbed({ embed }: MaybeQuoteEmbedProps) {
 				}}
 			/>
 		);
-	} else if (AppBskyEmbedRecord.isViewBlocked(embed.record)) {
+	}
+	if (AppBskyEmbedRecord.isViewBlocked(embed.record)) {
 		return "Blocked";
-	} else if (AppBskyEmbedRecord.isViewNotFound(embed.record)) {
+	}
+	if (AppBskyEmbedRecord.isViewNotFound(embed.record)) {
 		return "Deleted";
 	}
 	return null;

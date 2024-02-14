@@ -1,23 +1,23 @@
 import { atomStore } from "@/state/state";
 import { AppBskyFeedDefs } from "@atproto/api";
-import { atom } from "jotai";
-import { focusAtom } from "jotai-optics";
+import { atomFamily, atomWithStorage } from "jotai/utils";
 
-type PostsCache = Record<string, AppBskyFeedDefs.PostView>;
-const postsCache = atom<PostsCache>({});
-
-export const getPostAtom = (postDid: string) => {
-	return focusAtom(postsCache, (optic) => optic.prop(postDid)) ?? undefined;
-};
+export const postsFamily = atomFamily(
+	(post: Partial<AppBskyFeedDefs.PostView> & { uri: string }) =>
+		atomWithStorage(post.uri, post),
+	(a, b) => {
+		return a.uri === b.uri;
+	},
+);
 
 export const updatePostAtom = (
-	postDid: string,
+	postUri: string,
 	postData: Partial<AppBskyFeedDefs.PostView>,
 ) => {
-	const postCacheAtom = getPostAtom(postDid);
-	console.log("updating cache for post", postDid);
+	const postCacheAtom = postsFamily({ uri: postUri });
+	console.log("updating cache for post", postUri);
 	return atomStore.set(postCacheAtom, (prev) => ({
 		...prev,
-		[postDid]: postData,
+		...postData,
 	}));
 };
