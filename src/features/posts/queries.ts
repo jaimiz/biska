@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAgent } from "@/services/api";
 import { AppBskyFeedDefs } from "@atproto/api";
 import { SkylineSliceItem } from "../user/profileQueries";
-import { updatePostAtom } from "./atoms";
+import { postsCacheAtom, updatePostAtom } from "./atoms";
+import { useAtomValue } from "jotai";
 
 export const postKeys = {
 	all: ["posts"] as const,
@@ -12,6 +13,18 @@ export const postKeys = {
 		[...postKeys.details(), { uri }] as const,
 	searches: () => [...postKeys.all, "search"] as const,
 	search: (query: string) => [...postKeys.searches(), { query }] as const,
+};
+
+export const usePost = (uri: string) => {
+	const postsCache = useAtomValue(postsCacheAtom);
+	const queryClient = useQueryClient();
+	if (postsCache[uri as keyof typeof postsCache]) {
+		queryClient.setQueryData(
+			postKeys.detail({ uri }),
+			postsCache[uri as keyof typeof postsCache],
+		);
+	}
+	return usePostQuery({ uri });
 };
 
 export const usePostQuery = ({ uri }: { uri: string }) => {

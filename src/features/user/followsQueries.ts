@@ -1,9 +1,9 @@
+import { STALE } from "@/lib/queries";
 import { getAgent } from "@/services/api";
 import { AppBskyActorDefs } from "@atproto/api";
 import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
-import { currentAccountAtom } from "./sessionAtoms";
-import { STALE } from "@/lib/queries";
+import { requireAccountAtom } from "./sessionAtoms";
 
 // sanity limit is SANITY_PAGE_LIMIT*PAGE_SIZE total records
 const SANITY_PAGE_LIMIT = 1000;
@@ -15,14 +15,11 @@ const myfollowsKeys = {
 };
 
 export function useMyFollowsQuery() {
-	const currentAccount = useAtomValue(currentAccountAtom);
+	const currentAccount = useAtomValue(requireAccountAtom);
 	return useQuery<AppBskyActorDefs.ProfileViewBasic[]>({
 		staleTime: STALE.MINUTES.ONE,
 		queryKey: myfollowsKeys.all,
 		async queryFn() {
-			if (!currentAccount) {
-				return [];
-			}
 			let cursor: string | undefined = undefined;
 			let arr: AppBskyActorDefs.ProfileViewBasic[] = [];
 			for (let i = 0; i < SANITY_PAGE_LIMIT; i++) {

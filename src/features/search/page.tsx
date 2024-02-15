@@ -16,15 +16,15 @@ import { TextButton } from "@/components/ui/text-button";
 import { ProfileDisplayName } from "@/components/user/profile-display-name";
 import { buildSearchQuery, parseSearchQuery } from "@/lib/search-parser";
 import { bskyApi } from "@/services/api";
-import { AppBskyActorDefs, AppBskyFeedPost } from "@atproto/api";
+import { AppBskyActorDefs } from "@atproto/api";
 import { useAtom, useAtomValue } from "jotai";
 import { ExternalLinkIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Form, Outlet, useMatch, useSearchParams } from "react-router-dom";
-import { useSearchPostsQuery } from "./queries";
-import { requireAccountAtom } from "../user/sessionAtoms";
-import { useProfileQuery } from "../user/profileQueries";
 import { behaviorPreferencesAtom } from "../preferences/atoms";
+import { useProfileQuery } from "../user/profileQueries";
+import { requireAccountAtom } from "../user/sessionAtoms";
+import { useSearchPostsQuery } from "./queries";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
@@ -34,13 +34,7 @@ function SearchResults({ query }: { query: string }) {
 	}
 	const pages = data.pages.flatMap((page) => page.posts);
 	const posts = pages.map((post) => {
-		return (
-			<Post
-				key={post.cid}
-				post={post}
-				record={post.record as AppBskyFeedPost.Record}
-			/>
-		);
+		return <Post key={post.cid} post={post} />;
 	});
 
 	return isLoading ? (

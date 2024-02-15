@@ -216,7 +216,6 @@ function PostsTab({
 		return (
 			<Post
 				post={timelineEntry.post}
-				record={timelineEntry.record}
 				reason={timelineEntry.reason}
 				key={`${timelineEntry.post.cid}`}
 			/>

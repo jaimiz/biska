@@ -1,4 +1,3 @@
-import { postsFamily } from "@/features/posts/atoms";
 import {
 	usePostLikeMutation,
 	usePostRepostMutation,
@@ -8,7 +7,6 @@ import {
 import { SkylineSliceItem } from "@/features/user/profileQueries";
 import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
-import { useAtomValue } from "jotai";
 import {
 	LucideIcon,
 	MessageSquareDashedIcon,
@@ -33,8 +31,7 @@ function CounterIcon({ Icon, count, className }: CounterIconProps) {
 }
 
 export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
-	const postAtom = useAtomValue(postsFamily(post));
-	const replyCount = postAtom.replyCount ?? 0;
+	const replyCount = post.replyCount ?? 0;
 	const MessagesIcon =
 		replyCount > 4
 			? MessagesSquareIcon
@@ -42,9 +39,8 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 			? MessageSquareIcon
 			: MessageSquareDashedIcon;
 
-	console.log({ postAtom });
-	const hasReposted = Boolean(postAtom.viewer?.repost);
-	const hasLiked = Boolean(postAtom.viewer?.like);
+	const hasReposted = Boolean(post.viewer?.repost);
+	const hasLiked = Boolean(post.viewer?.like);
 	const repost = usePostRepostMutation(post);
 	const like = usePostLikeMutation(post);
 	const unrepost = usePostUnrepostMutation(post);
@@ -58,7 +54,7 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 				type="button"
 				onClick={() => {
 					if (hasReposted) {
-						unrepost.mutate(postAtom.viewer?.repost as string);
+						unrepost.mutate(post.viewer?.repost as string);
 						return;
 					}
 					repost.mutate(post);
@@ -69,13 +65,13 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 					!hasReposted && ["text-inherit", "hover:text-green-700"],
 				)}
 			>
-				<CounterIcon Icon={Repeat2Icon} count={postAtom.repostCount} />
+				<CounterIcon Icon={Repeat2Icon} count={post.repostCount} />
 			</button>
 			<button
 				type="button"
 				onClick={() => {
 					if (hasLiked) {
-						unlike.mutate(postAtom.viewer?.like as string);
+						unlike.mutate(post.viewer?.like as string);
 						return;
 					}
 					like.mutate(post);
@@ -92,7 +88,7 @@ export function PostControls({ post }: { post: SkylineSliceItem["post"] }) {
 						"stroke-current": hasLiked,
 					})}
 					Icon={StarIcon}
-					count={postAtom.likeCount}
+					count={post.likeCount}
 				/>
 			</button>
 		</>

@@ -2,6 +2,7 @@ import { makeHandleLink } from "@/lib/strings/handle";
 import { cn } from "@/lib/utils";
 import { Did } from "@/state/schema";
 
+import { usePost } from "@/features/posts/queries";
 import {
 	SkylineSliceItem,
 	useProfileQuery,
@@ -27,20 +28,31 @@ import { TimeElapsed } from "../text/time-elapsed";
 import { UserAvatar } from "../user/avatar";
 import { ProfileDisplayName } from "../user/profile-display-name";
 import { PostControls } from "./post-controls";
-import { usePostQuery } from "@/features/posts/queries";
 
 type PostProps = SkylineSliceItem;
-export function Post({ post, record }: PostProps) {
-	const { data: postData } = usePostQuery({ uri: post.uri });
+export function Post({ post }: PostProps) {
+	const { data: postData } = usePost(post.uri);
+
+	const record = useMemo<AppBskyFeedPost.Record | undefined>(
+		() =>
+			AppBskyFeedPost.isRecord(postData?.record) &&
+			AppBskyFeedPost.validateRecord(postData?.record).success
+				? postData?.record
+				: undefined,
+		[post],
+	);
+
 	const postText = useMemo(() => {
+		if (!record) return undefined;
 		const rt = new RichTextAPI({
 			text: record.text,
+			facets: record.facets,
 		});
 		rt.detectFacetsWithoutResolution();
 		return rt;
 	}, [record]);
 
-	if (!postData) return null;
+	if (!postData || !record || !postText) return null;
 
 	return (
 		<div

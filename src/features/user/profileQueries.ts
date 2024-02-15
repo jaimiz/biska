@@ -1,11 +1,7 @@
 import { isBlockedByError, isBlockingError } from "@/lib/errors";
 import { getAgent } from "@/services/api";
 import { Did } from "@/state/schema";
-import {
-	AppBskyFeedDefs,
-	AppBskyFeedGetAuthorFeed,
-	AppBskyFeedPost,
-} from "@atproto/api";
+import { AppBskyFeedDefs, AppBskyFeedGetAuthorFeed } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -34,7 +30,6 @@ export function useProfileQuery({ did }: { did: Did }) {
 }
 
 export type SkylineSliceItem = {
-	record: AppBskyFeedPost.Record;
 	post: AppBskyFeedDefs.PostView;
 	reason?: AppBskyFeedDefs.ReasonRepost;
 };
@@ -76,7 +71,6 @@ export const useProfilePosts = (
 		const flat = profilePostsQuery.data.pages.flatMap((page) => page.feed);
 		return flat.flatMap<SkylineSliceItem>((item) => {
 			return {
-				record: item.post.record as AppBskyFeedPost.Record,
 				post: item.post,
 				reason: item.reason as AppBskyFeedDefs.ReasonRepost,
 			};
