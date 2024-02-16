@@ -1,5 +1,5 @@
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
-import { AppLink } from "../link";
+import { SmartLink } from "../link";
 import { UserAvatar } from "./avatar";
 
 type ProfileCardProps = {
@@ -8,7 +8,7 @@ type ProfileCardProps = {
 export function ProfileCard(props: ProfileCardProps) {
 	const { profile } = props;
 	return (
-		<AppLink
+		<SmartLink
 			to={`/profile/${profile.handle}`}
 			className="px-6 py-4 flex items-center gap-3"
 		>
@@ -21,6 +21,6 @@ export function ProfileCard(props: ProfileCardProps) {
 					@{profile.handle}
 				</div>
 			</div>
-		</AppLink>
+		</SmartLink>
 	);
 }

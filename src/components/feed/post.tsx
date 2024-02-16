@@ -22,7 +22,7 @@ import { SiSpotify } from "@icons-pack/react-simple-icons";
 import { ClassValue } from "clsx";
 import { PlayCircleIcon, ReplyIcon } from "lucide-react";
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { ContainerLink } from "../link";
+import { ContainerLink, SmartLink } from "../link";
 import { RichText } from "../text";
 import { TimeElapsed } from "../text/time-elapsed";
 import { UserAvatar } from "../user/avatar";
@@ -106,11 +106,11 @@ type PostLinkProps = PropsWithChildren<{
 }>;
 function PostLink({ post, children }: PostLinkProps) {
 	const [, , did, , rkey] = post.uri.split("/");
-	const postUrl = `https://bsky.app/profile/${did}/post/${rkey}`;
+	const postUrl = `/profile/${did}/post/${rkey}`;
 	return (
-		<a target="_blank" rel="noreferrer noopener" href={postUrl}>
+		<SmartLink target="_blank" rel="noreferrer noopener" to={postUrl}>
 			{children}
-		</a>
+		</SmartLink>
 	);
 }
 

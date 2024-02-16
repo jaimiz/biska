@@ -3,8 +3,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAgent } from "@/services/api";
 import { AppBskyFeedDefs } from "@atproto/api";
 import { SkylineSliceItem } from "../user/profileQueries";
-import { postsCacheAtom, updatePostAtom } from "./atoms";
 import { useAtomValue } from "jotai";
+import { postsCacheAtom, updatePostAtom } from "@/lib/cache";
 
 export const postKeys = {
 	all: ["posts"] as const,

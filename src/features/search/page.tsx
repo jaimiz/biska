@@ -20,7 +20,7 @@ import { AppBskyActorDefs } from "@atproto/api";
 import { useAtom, useAtomValue } from "jotai";
 import { ExternalLinkIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Form, Outlet, useMatch, useSearchParams } from "react-router-dom";
+import { Form, Outlet, useSearchParams } from "react-router-dom";
 import { behaviorPreferencesAtom } from "../preferences/atoms";
 import { useProfileQuery } from "../user/profileQueries";
 import { requireAccountAtom } from "../user/sessionAtoms";
@@ -84,7 +84,6 @@ export function Search() {
 	const [searchType, setSearchType] = useState<"all" | "me" | "user">("all");
 	const [userToSearch, setUserToSearch] = useState("");
 	const isClearingUser = useRef(false);
-	const isRoot = useMatch("/");
 	const [searchParams] = useSearchParams();
 
 	function readQueryFromUrl() {
@@ -126,7 +125,7 @@ export function Search() {
 							currentUserProfile.data as AppBskyActorDefs.ProfileViewDetailed
 						}
 					/>{" "}
-					&middot; <PreferencesDrawer /> |
+					&middot; <PreferencesPane /> |
 					<button
 						type="button"
 						onClick={() => {
@@ -139,7 +138,7 @@ export function Search() {
 				</div>
 			</div>
 
-			<Form method="get" action="/">
+			<Form method="get" action="/search">
 				<div className="flex w-full max-w-[1000px] justify-center items-center gap-x-4">
 					<input type="hidden" name="q" value={query} />
 					<Input
@@ -247,7 +246,7 @@ export function Search() {
 				</>
 			) : null}
 
-			<Drawer open={isRoot === null}>
+			<Drawer open={false}>
 				<Outlet />
 			</Drawer>
 
@@ -265,7 +264,7 @@ export function Search() {
 	);
 }
 
-function PreferencesDrawer() {
+export function PreferencesPane() {
 	const [behavior, setBehavior] = useAtom(behaviorPreferencesAtom);
 	return (
 		<Sheet>

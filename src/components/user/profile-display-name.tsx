@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { ClassValue } from "clsx";
-import { ProfileLink } from "../link";
+import { SmartLink } from "../link";
 import { atom, useSetAtom } from "jotai";
 
 type ProfileDisplayNameProps = {
@@ -15,7 +15,7 @@ export function ProfileDisplayName(props: ProfileDisplayNameProps) {
 	const { profile, className, showUsername = true } = props;
 	const setPeekProfile = useSetAtom(peekProfileAtom);
 	return (
-		<ProfileLink
+		<SmartLink
 			onClick={() => {
 				setPeekProfile(profile);
 			}}
@@ -34,6 +34,6 @@ export function ProfileDisplayName(props: ProfileDisplayNameProps) {
 					@{profile.handle}
 				</div>
 			)}
-		</ProfileLink>
+		</SmartLink>
 	);
 }

@@ -2,21 +2,21 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { useReloadPrompt } from "./lib/useServiceWorker";
 import { Centered } from "./components/layouts/Centered";
 import { LoginScreen } from "./components/login-screen";
 import { Toaster } from "./components/ui/sonner";
 import { Spinner } from "./components/ui/spinner";
-import { Profile } from "./components/user/profile";
-import { queryClient } from "./lib/react-query";
-import { bskyApi } from "./services/api";
-import { persisted } from "./state/state";
-import { Search } from "./features/search/page";
-import { TimeTickProvider } from "./lib/clock";
 import {
 	currentAccountAtom,
 	sessionStateAtom,
 } from "./features/user/sessionAtoms";
+import { TimeTickProvider } from "./lib/clock";
+import { queryClient } from "./lib/react-query";
+import { useReloadPrompt } from "./lib/useServiceWorker";
+import { bskyApi } from "./services/api";
+import { persisted } from "./state/state";
+import { DashboardView } from "./views/Dashboard";
+import { Search } from "./features/search/page";
 
 function LoadingScreen() {
 	return (
@@ -31,14 +31,11 @@ function LoadingScreen() {
 export function AppRouter() {
 	const router = createBrowserRouter([
 		{
-			path: "/",
+			errorElement: <DashboardView />,
+		},
+		{
+			path: "/search",
 			element: <Search />,
-			children: [
-				{
-					path: "profile/:handleOrDid",
-					Component: Profile,
-				},
-			],
 		},
 	]);
 	return (

@@ -3,6 +3,7 @@ import { AppBskyRichtextFacet, RichText as RichTextAPI } from "@atproto/api";
 import { VariantProps, cva } from "class-variance-authority";
 import { ClassValue } from "clsx";
 import { PropsWithChildren } from "react";
+import { SmartLink } from "../link";
 
 const richTextVariants = cva("", {
 	variants: {
@@ -55,24 +56,24 @@ export function RichText({ richText, className, format }: RichTextProps) {
 		if (mention && AppBskyRichtextFacet.validateMention(mention).success) {
 			console.log("valid", { mention });
 			els.push(
-				<a key={key} href={`/profile/${mention.did}`}>
+				<SmartLink key={key} to={`/profile/${mention.did}`}>
 					{segment.text}
-				</a>,
+				</SmartLink>,
 			);
 		} else if (mention?.did) {
 			// TODO: This is an optmistc mention, so we'll just us the handle and not the
 			// resolved did. I want to implement a cache for this in the future, but
 			// for now this is fine.
 			els.push(
-				<a key={key} href={`/profile/${mention.did}`}>
+				<SmartLink key={key} to={`/profile/${mention.did}`}>
 					{segment.text}
-				</a>,
+				</SmartLink>,
 			);
 		} else if (link && AppBskyRichtextFacet.validateLink(link).success) {
 			els.push(
-				<a key={key} href={`${link.uri}`}>
+				<SmartLink key={key} to={`${link.uri}`}>
 					{segment.text}
-				</a>,
+				</SmartLink>,
 			);
 		} else {
 			els.push(segment.text);

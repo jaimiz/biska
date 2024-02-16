@@ -45,27 +45,11 @@ const appMetaSchema = z.object({
 
 export type AppMeta = z.infer<typeof appMetaSchema>;
 
-const columnSettingsSchema = z.object({
-	name: z.string(),
-});
-
-const columnSchema = z.discriminatedUnion("type", [
-	// Skyline column
-	z.object({
-		type: z.enum(["skyline"]),
-		account: did,
-		settings: columnSettingsSchema,
-	}),
-]);
-
-export type Column = z.infer<typeof columnSchema>;
-
 /* General Schema */
 
 export const StorageSchema = z.object({
 	session: sessionSchema,
 	preferences: preferencesSchema,
-	columns: z.array(columnSchema),
 	meta: appMetaSchema,
 });
 
@@ -98,7 +82,6 @@ export const defaultAppSchema: AppSchema = {
 			openProfileIn: "bsky",
 		},
 	},
-	columns: [],
 	meta: {
 		version: BISKA_VERSION,
 	},

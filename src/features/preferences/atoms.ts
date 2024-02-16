@@ -37,6 +37,7 @@ export const behaviorPreferencesAtom = atom(
 		});
 	},
 );
+
 export const interfacePreferencesAtom = atom(
 	(get) => {
 		return get(preferencesAtom).interface;
