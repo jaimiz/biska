@@ -1,39 +1,21 @@
 import { Session } from "@/state/schema";
-import { appStateAtom, persisted } from "@/state/state";
+import { memoryAppStateAtom } from "@/state/state";
 import { atom } from "jotai";
 
-type SessionState = {
-	isInitialLoad: boolean;
-};
-export const sessionStateAtom = atom(
-	(get) => {
-		return get(appStateAtom).sessionState;
-	},
-	(get, set, sessionState: SessionState) => {
-		const prev = get(appStateAtom);
-		set(appStateAtom, {
-			...prev,
-			sessionState,
-		});
-	},
-);
+const sessionAtom = atom((get): Session => {
+	const { session } = get(memoryAppStateAtom);
+	return {
+		currentAccount: undefined,
+		...session,
+	};
+});
 
-export const sessionAtom = atom(
-	(get): Session => {
-		const { session } = get(appStateAtom);
-		return {
-			currentAccount: undefined,
-			...session,
-		};
-	},
-	(_, __, session: Session) => {
-		persisted.write("session", session);
-		return session;
-	},
-);
-
-export const currentAccountAtom = atom((get) => {
+export const maybeAccountAtom = atom((get) => {
 	return get(sessionAtom).currentAccount;
+});
+
+export const isLoggedInAtom = atom((get) => {
+	return get(sessionAtom).currentAccount !== undefined;
 });
 
 export const requireAccountAtom = atom((get) => {

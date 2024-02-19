@@ -1,6 +1,10 @@
 import { PreferencesDrawer } from "@/components/preferences/pane";
-import { InteractiveSearch } from "@/components/search/interactive-search";
+import {
+	InteractiveSearch,
+	interactiveSearchAtom,
+} from "@/components/search/interactive-search";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
+import { isLoggedInAtom } from "@/components/user/sessionAtoms";
 import { bskyApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { atom, useAtom, useAtomValue } from "jotai";
@@ -10,11 +14,11 @@ import {
 	SearchIcon,
 	WrenchIcon,
 } from "lucide-react";
-import { ButtonHTMLAttributes, forwardRef, useCallback, useState } from "react";
+import { ButtonHTMLAttributes, forwardRef, useCallback } from "react";
 import { DeckView } from "./DeckView";
+import { EmptyView } from "./EmptyView";
 
-const interactiveSearchAtom = atom(true);
-
+export const dashboardSidebarExpanded = atom(false);
 function DashboardSidebar() {
 	const SidebarButton = forwardRef<
 		HTMLButtonElement,
@@ -29,11 +33,19 @@ function DashboardSidebar() {
 			}: ButtonHTMLAttributes<HTMLButtonElement>,
 			ref,
 		) => {
+			if (props.hidden) return null;
 			return (
 				<button
 					ref={ref}
 					className={cn(
-						"group/button flex items-center justify-center hover:justify-start gap-3 p-4 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700",
+						"group/button flex items-center justify-center gap-3 p-4 text-gray-600 dark:text-gray-400",
+						{
+							"cursor-not-allowed": props.disabled,
+						},
+						{
+							"dark:hover:text-white dark:hover:bg-gray-700 hover:text-gray-900 hover:bg-gray-100 hover:justify-start cursor-pointer":
+								!props.disabled,
+						},
 						className,
 					)}
 					type={type ?? "button"}
@@ -44,19 +56,19 @@ function DashboardSidebar() {
 			);
 		},
 	);
-	const [expanded, setExpanded] = useState(false);
+	const [expanded, setExpanded] = useAtom(dashboardSidebarExpanded);
 
 	const toggleExpanded = useCallback(() => {
 		setExpanded(!expanded);
-	}, [expanded]);
+	}, [expanded, setExpanded]);
 
-	const [interactiveSearchOpen, setInteractiveSearchOpen] = useAtom(
-		interactiveSearchAtom,
-	);
+	const [, setInteractiveSearchOpen] = useAtom(interactiveSearchAtom);
 
 	const toggleInteractiveSearch = useCallback(() => {
-		setInteractiveSearchOpen(!interactiveSearchOpen);
-	}, [interactiveSearchOpen, setInteractiveSearchOpen]);
+		setInteractiveSearchOpen();
+	}, [setInteractiveSearchOpen]);
+
+	const isLoggedIn = useAtomValue(isLoggedInAtom);
 
 	return (
 		<div
@@ -71,6 +83,7 @@ function DashboardSidebar() {
 				<SidebarButton
 					onClick={toggleInteractiveSearch}
 					className={cn({ "w-full justify-start": expanded })}
+					hidden={!isLoggedIn}
 				>
 					<SearchIcon />
 					<span
@@ -82,13 +95,21 @@ function DashboardSidebar() {
 					</span>
 				</SidebarButton>
 			</div>
-			<div className="hover:w-auto bg-transparent mt-auto">
+			<div
+				className={cn("bg-transparent mt-auto", {
+					"hover:w-auto": isLoggedIn,
+				})}
+			>
 				<Sheet>
 					<SheetTrigger asChild>
-						<SidebarButton className={cn({ "w-full justify-start": expanded })}>
+						<SidebarButton
+							disabled={!isLoggedIn}
+							className={cn({ "w-full justify-start": expanded })}
+						>
 							<WrenchIcon />
 							<span
-								className={cn("sr-only group-hover/button:not-sr-only", {
+								className={cn("sr-only ", {
+									"group-hover/button:not-sr-only": isLoggedIn,
 									"not-sr-only": expanded,
 								})}
 							>
@@ -101,13 +122,15 @@ function DashboardSidebar() {
 
 				<SidebarButton
 					className={cn({ "w-full justify-start": expanded })}
+					disabled={!isLoggedIn}
 					onClick={() => {
 						bskyApi.logout();
 					}}
 				>
 					<LogOutIcon />
 					<span
-						className={cn("sr-only group-hover/button:not-sr-only", {
+						className={cn("sr-only ", {
+							"group-hover/button:not-sr-only": isLoggedIn,
 							"not-sr-only": expanded,
 						})}
 					>
@@ -115,34 +138,38 @@ function DashboardSidebar() {
 					</span>
 				</SidebarButton>
 			</div>
-			<div className="hidden group-hover:flex absolute right-0 translate-x-3 top-0 bottom-0">
-				<button
-					type="button"
-					className="m-auto bg-white rounded-full border border-red-50 p-1"
-					onClick={toggleExpanded}
-				>
+			<button
+				type="button"
+				onClick={toggleExpanded}
+				className={cn(
+					"group/expander flex absolute right-0 translate-x-1 top-0 bottom-0 w-4",
+					{
+						hidden: !isLoggedIn,
+					},
+				)}
+			>
+				<div className="m-auto hidden group-hover/expander:block bg-white rounded-full border border-red-50 p-1 pointer-events-auto">
 					<ArrowRightLeft size={14} />
-				</button>
-			</div>
+				</div>
+			</button>
 		</div>
 	);
 }
 
 export function MultiColumnView() {
-	const interactiveSearchOpen = useAtomValue(interactiveSearchAtom);
+	const isLoggedIn = useAtomValue(isLoggedInAtom);
 	return (
 		<div className="flex h-screen w-screen overflow-hidden divide-x">
 			<DashboardSidebar />
 			<div
 				className={cn(
-					"flex grow gap-1 overflow-x-auto bg-background-dark transition-transform divide-x",
-					{
-						"-translate-x-120": !interactiveSearchOpen,
-					},
+					"flex grow bg-background-dark transition-transform divide-x",
 				)}
 			>
-				<InteractiveSearch />
-				<DeckView />
+				{isLoggedIn && <InteractiveSearch />}
+				<div className="h-screen overflow-y-auto flex grow gap-1 overflow-x-auto">
+					{isLoggedIn ? <DeckView /> : <EmptyView />}
+				</div>
 			</div>
 		</div>
 	);

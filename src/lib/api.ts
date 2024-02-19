@@ -1,5 +1,10 @@
 import type { Did, PersistedAccount, Session } from "@/state/schema";
-import { appStateAtom, atomStore, persisted } from "@/state/state";
+import {
+	atomStore,
+	memoryAppStateAtom,
+	storageAppStateAtom,
+} from "@/state/state";
+import { dashboardSidebarExpanded } from "@/views/MultiColumnLayout";
 import { AtpPersistSessionHandler, BskyAgent } from "@atproto/api";
 
 export const PUBLIC_BSKY_AGENT = new BskyAgent({
@@ -28,18 +33,27 @@ export type ApiMethods = {
 };
 
 export function setSessionAndPersist(fn: (prev: Session) => Session) {
-	const state = atomStore.get(appStateAtom);
-	const prev = state.session;
-	state.session = fn(prev);
-	persisted.write("session", state.session);
-	return state.session;
+	const prev = atomStore.get(memoryAppStateAtom).session;
+	const { currentAccount, accounts } = fn(prev);
+	atomStore.set(storageAppStateAtom, {
+		session: {
+			currentAccount,
+			accounts,
+		},
+	});
+	return {
+		currentAccount,
+		accounts,
+	};
 }
 
 export function setSession(fn: (prev: Session) => Session) {
-	const state = atomStore.get(appStateAtom);
-	const prev = state.session;
-	persisted.write("session", fn(prev));
-	return state.session;
+	const prev = atomStore.get(memoryAppStateAtom).session;
+	const session = fn(prev);
+	atomStore.set(storageAppStateAtom, {
+		session,
+	});
+	return session;
 }
 
 function createPersistSessionHandler(
@@ -118,8 +132,9 @@ const removeAccount: ApiMethods["removeAccount"] = (account) => {
 		};
 	});
 };
-const logout: ApiMethods["logout"] = async () =>
-	void setSessionAndPersist((s) => {
+const logout: ApiMethods["logout"] = async () => {
+	atomStore.set(dashboardSidebarExpanded, false);
+	setSessionAndPersist((s) => {
 		return {
 			...s,
 			agent: PUBLIC_BSKY_AGENT,
@@ -131,6 +146,7 @@ const logout: ApiMethods["logout"] = async () =>
 			})),
 		};
 	});
+};
 
 const initSession = async (account: PersistedAccount) => {
 	const agent = new BskyAgent({
@@ -181,16 +197,6 @@ const resumeSession: ApiMethods["resumeSession"] = async (account) => {
 		setSession((session) => ({
 			...session,
 		}));
-		atomStore.set(appStateAtom, (prevState) => {
-			const prevSession = prevState.sessionState;
-			return {
-				...prevState,
-				sessionState: {
-					...prevSession,
-					isInitialLoad: false,
-				},
-			};
-		});
 	}
 };
 

@@ -8,6 +8,9 @@ import { useState } from "react";
 import { useSearchPostsQuery } from "./queries";
 import { BskyAppLink } from "../ui/link";
 import { Column, ColumnContent, ColumnHeader } from "../panes/column";
+import { cn } from "@/lib/utils";
+import { atom, useAtomValue } from "jotai";
+import { isLoggedInAtom } from "../user/sessionAtoms";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
@@ -61,17 +64,31 @@ function SearchResults({ query }: { query: string }) {
 	);
 }
 
+const interactiveSearchOpenAtom = atom(true);
+export const interactiveSearchAtom = atom(
+	(get) => {
+		const isLogged = get(isLoggedInAtom);
+		return isLogged && get(interactiveSearchOpenAtom);
+	},
+	(get, set, update?: boolean) => {
+		const prev = get(interactiveSearchOpenAtom);
+		set(interactiveSearchOpenAtom, update ?? !prev);
+	},
+);
+
 export function InteractiveSearch() {
-	// const [interactiveSearch, setInteractiveSearch] = useAtom(
-	// 	interactiveSearchAtom,
-	// );
+	const isOpen = useAtomValue(interactiveSearchAtom);
 	const [searchTerms, setSearchTerms] = useState("");
 	const [query, setQuery] = useState("");
 	const [searchType] = useState<"all" | "me" | "user">("all");
 
-	//  className="z-0 -translate-x-full"
 	return (
-		<Column>
+		<Column
+			size="lg"
+			className={cn("w-0 overflow-hidden transition-[width]", {
+				"w-120": isOpen,
+			})}
+		>
 			<ColumnHeader title="Buscar" icon="interactiveSearch" />
 			<ColumnContent>
 				<div className="flex w-full justify-center items-center gap-x-4">

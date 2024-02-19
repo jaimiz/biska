@@ -54,13 +54,7 @@ export const StorageSchema = z.object({
 	meta: appMetaSchema,
 });
 
-export const AppSchema = z
-	.object({
-		sessionState: z.object({
-			isInitialLoad: z.boolean(),
-		}),
-	})
-	.and(StorageSchema);
+export const AppSchema = StorageSchema;
 
 export type StorageSchema = z.infer<typeof StorageSchema>;
 export type AppSchema = z.infer<typeof AppSchema>;
@@ -69,9 +63,6 @@ export type StorageSchemaKey = keyof StorageSchema;
 export type AppSchemaKey = keyof AppSchema;
 
 export const defaultAppSchema: AppSchema = {
-	sessionState: {
-		isInitialLoad: true,
-	},
 	session: {
 		accounts: [],
 	},

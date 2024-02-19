@@ -11,7 +11,8 @@ import { behaviorPreferencesAtom } from "../preferences/atoms";
 type LinkProps = RouterLinkProps & RefAttributes<HTMLAnchorElement>;
 
 export function NavLink(props: LinkProps) {
-	return <RouterLink {...props} />;
+	const { className, ...rest } = props;
+	return <RouterLink className={cn("text-primary", className)} {...rest} />;
 }
 
 export function BskyAppLink(props: LinkProps) {
@@ -21,10 +22,10 @@ export function BskyAppLink(props: LinkProps) {
 
 	const { children, ...rest } = props;
 	return (
-		<RouterLink {...rest} to={bskyLink} target="_blank">
+		<NavLink {...rest} to={bskyLink} target="_blank">
 			{children}
-			<ExternalLinkIcon className="w-3 h-3" />
-		</RouterLink>
+			<ExternalLinkIcon className="w-3 h-3 inline-block" />
+		</NavLink>
 	);
 }
 
@@ -33,7 +34,7 @@ export function SmartLink(props: LinkProps) {
 	if (openProfileIn === "bsky") {
 		return <BskyAppLink {...props} />;
 	}
-	return <RouterLink {...props} />;
+	return <NavLink {...props} />;
 }
 
 export function ContainerLink({ children, className, ...rest }: LinkProps) {

@@ -1,21 +1,6 @@
 import { atom, getDefaultStore } from "jotai";
 import * as localforage from "localforage";
-import {
-	AppSchema,
-	StorageSchema,
-	StorageSchemaKey,
-	defaultAppSchema,
-} from "./schema.ts";
-
-export const atomStore = getDefaultStore();
-export const appStateAtom = atom(defaultAppSchema);
-
-export const initializeStoredState = (state: StorageSchema | undefined) => {
-	return {
-		...defaultAppSchema,
-		...state,
-	};
-};
+import { AppSchema, StorageSchema, defaultAppSchema } from "./schema.ts";
 
 const BISKA_STORAGE_VERSION = "0.0.0";
 export const BISKA_STORAGE_KEY = "BISKA";
@@ -23,55 +8,37 @@ localforage.config({
 	name: `${BISKA_STORAGE_KEY}_v${BISKA_STORAGE_VERSION}`,
 });
 
-const storage = {
-	async write(value: AppSchema) {
-		try {
-			// We parse using StorageSchema to ensure that extraneous keys are removed
-			const parsed = StorageSchema.parse(value);
-			await localforage.setItem(BISKA_STORAGE_KEY, parsed);
-		} catch (e) {
-			console.error(e);
-			console.log("error writing to persistent storage");
-		}
-	},
+export const atomStore = getDefaultStore();
+export const memoryAppStateAtom = atom<AppSchema>(defaultAppSchema);
 
-	async read(): Promise<StorageSchema | undefined> {
+export const storageAppStateAtom = atom(
+	async (get) => {
 		const rawData = await localforage.getItem<unknown>(BISKA_STORAGE_KEY);
 		if (StorageSchema.safeParse(rawData).success) {
 			return rawData as AppSchema;
 		}
+		return get(memoryAppStateAtom);
 	},
-};
-
-export const persisted = {
-	async init() {
-		try {
-			const stored = await storage.read(); // check for new store
-			if (!stored) await storage.write(defaultAppSchema); // opt: init new store
-			atomStore.set(appStateAtom, initializeStoredState(stored));
-			return atomStore.get(appStateAtom);
-		} catch (e) {
-			console.error("persisted state: failed to load root state from storage", {
-				error: e,
+	(get, set, update: Partial<AppSchema>) => {
+		const prev = get(memoryAppStateAtom);
+		const next = {
+			...prev,
+			...update,
+		};
+		const parsed = StorageSchema.parse(next);
+		set(memoryAppStateAtom, parsed);
+		localforage
+			.setItem(BISKA_STORAGE_KEY, { ...prev, ...update })
+			.catch((e) => {
+				console.error("Error writing to persistent storage", e);
+				console.error(update);
 			});
-			// AsyncStorage failured, but we can still continue in memory
-			return defaultAppSchema;
-		}
 	},
+);
 
-	get<K extends StorageSchemaKey>(key: K) {
-		return atomStore.get(appStateAtom)[key];
-	},
-
-	write<K extends StorageSchemaKey>(key: K, value: StorageSchema[K]) {
-		try {
-			atomStore.set(appStateAtom, (prevState) => ({
-				...prevState,
-				[key]: value,
-			}));
-			storage.write({ ...atomStore.get(appStateAtom) });
-		} catch (e) {
-			console.error("error persisting state to store", { e });
-		}
-	},
+export const initializeStoredState = (state: StorageSchema | undefined) => {
+	return {
+		...defaultAppSchema,
+		...state,
+	};
 };
