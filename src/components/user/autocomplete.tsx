@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 
 import { useEffect, useState } from "react";
-import { useActorAutocompleteFn } from "@/features/user/autocompleteQueries";
+import { useActorAutocompleteFn } from "./autocomplete-queries";
 
 type AutocompleteProps = {
 	onSelect?: (value: string) => void;

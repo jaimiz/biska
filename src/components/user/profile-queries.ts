@@ -1,5 +1,5 @@
+import { getAgent } from "@/lib/api";
 import { isBlockedByError, isBlockingError } from "@/lib/errors";
-import { getAgent } from "@/services/api";
 import { Did } from "@/state/schema";
 import { AppBskyFeedDefs, AppBskyFeedGetAuthorFeed } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";

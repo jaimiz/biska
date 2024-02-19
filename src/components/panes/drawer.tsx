@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { PropsWithChildren } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent } from "./ui/sheet";
+import { Sheet, SheetContent } from "../ui/sheet";
 
 export function Drawer({
 	children,

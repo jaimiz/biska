@@ -1,7 +1,7 @@
-import { Column, ColumnContent, ColumnHeader } from "@/components/column";
 import { Did } from "@/state/schema";
 import { atomWithStorage } from "jotai/utils";
 import { InteractiveSearch } from "../search/interactive-search";
+import { Column, ColumnContent, ColumnHeader } from "./column";
 
 type CommonColumn = {
 	account: Did;
@@ -13,7 +13,9 @@ type InteractiveSearchColumn = CommonColumn & {
 };
 
 export type ColumnConfig = InteractiveSearchColumn;
-export const columnsAtom = atomWithStorage<ColumnConfig[]>("columns", []);
+export const columnsAtom = atomWithStorage<ColumnConfig[]>("columns", [
+	{ type: "interactiveSearch", title: "Busca", account: "did:plc:test" },
+]);
 
 export const createColumn = {
 	interactiveSearch: (account: Did): InteractiveSearchColumn => ({

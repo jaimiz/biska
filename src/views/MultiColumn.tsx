@@ -1,9 +1,8 @@
-import { Deck } from "@/components/deck";
+import { PreferencesDrawer } from "@/components/preferences/pane";
+import { InteractiveSearch } from "@/components/search/interactive-search";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { PreferencesDrawer } from "@/features/preferences/pane";
-import { InteractiveSearch } from "@/features/search/interactive-search";
+import { bskyApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { bskyApi } from "@/services/api";
 import { atom, useAtom, useAtomValue } from "jotai";
 import {
 	ArrowRightLeft,
@@ -12,6 +11,7 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import { ButtonHTMLAttributes, forwardRef, useCallback, useState } from "react";
+import { DeckView } from "./DeckView";
 
 const interactiveSearchAtom = atom(true);
 
@@ -61,7 +61,7 @@ function DashboardSidebar() {
 	return (
 		<div
 			className={cn(
-				"group flex bg-white w-14 transition-[width] shrink-0 flex-col border-r border-divider z-10 relative",
+				"group flex bg-white w-14 transition-[width] shrink-0 flex-col z-10 relative",
 				{
 					"w-80": expanded,
 				},
@@ -78,7 +78,7 @@ function DashboardSidebar() {
 							"not-sr-only": expanded,
 						})}
 					>
-						Busca
+						Buscar
 					</span>
 				</SidebarButton>
 			</div>
@@ -128,21 +128,21 @@ function DashboardSidebar() {
 	);
 }
 
-export function DashboardView() {
+export function MultiColumnView() {
 	const interactiveSearchOpen = useAtomValue(interactiveSearchAtom);
 	return (
-		<div className="flex h-screen w-screen overflow-hidden">
+		<div className="flex h-screen w-screen overflow-hidden divide-x">
 			<DashboardSidebar />
 			<div
 				className={cn(
-					"flex grow gap-1 overflow-x-auto bg-background-dark px-1 transition-transform",
+					"flex grow gap-1 overflow-x-auto bg-background-dark transition-transform divide-x",
 					{
-						"-translate-x-96": !interactiveSearchOpen,
+						"-translate-x-120": !interactiveSearchOpen,
 					},
 				)}
 			>
-				<InteractiveSearch className="w-96" />
-				<Deck />
+				<InteractiveSearch />
+				<DeckView />
 			</div>
 		</div>
 	);

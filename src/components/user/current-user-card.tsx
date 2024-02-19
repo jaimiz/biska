@@ -1,7 +1,7 @@
-import { requireAccountAtom } from "@/features/user/sessionAtoms";
 import { useAtomValue } from "jotai";
 import { ProfileCard } from "../user/profile-card";
-import { useProfileQuery } from "@/features/user/profileQueries";
+import { requireAccountAtom } from "./sessionAtoms";
+import { useProfileQuery } from "./profile-queries";
 
 export function CurrentUserCard() {
 	const currentAccount = useAtomValue(requireAccountAtom);

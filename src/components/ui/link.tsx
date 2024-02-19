@@ -1,4 +1,3 @@
-import { behaviorPreferencesAtom } from "@/features/preferences/atoms";
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "jotai";
 import { ExternalLinkIcon } from "lucide-react";
@@ -7,6 +6,7 @@ import {
 	Link as RouterLink,
 	LinkProps as RouterLinkProps,
 } from "react-router-dom";
+import { behaviorPreferencesAtom } from "../preferences/atoms";
 
 type LinkProps = RouterLinkProps & RefAttributes<HTMLAnchorElement>;
 

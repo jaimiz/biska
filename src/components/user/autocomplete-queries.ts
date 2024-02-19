@@ -5,9 +5,9 @@ import {
 } from "@atproto/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { getAgent } from "@/services/api";
-import { useMyFollowsQuery } from "./followsQueries";
 import { STALE } from "@/lib/queries";
+import { useMyFollowsQuery } from "./follows-queries";
+import { getAgent } from "@/lib/api";
 
 export const RQKEY = (prefix: string) => ["actor-autocomplete", prefix];
 

@@ -1,5 +1,3 @@
-import { AutocompleteUsers } from "@/components/autocomplete";
-import { Drawer } from "@/components/drawer";
 import { Post } from "@/components/feed/post";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,16 +13,20 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextButton } from "@/components/ui/text-button";
 import { ProfileDisplayName } from "@/components/user/profile-display-name";
 import { buildSearchQuery, parseSearchQuery } from "@/lib/search-parser";
-import { bskyApi } from "@/services/api";
+
 import { AppBskyActorDefs } from "@atproto/api";
 import { useAtom, useAtomValue } from "jotai";
 import { ExternalLinkIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Form, Outlet, useSearchParams } from "react-router-dom";
 import { behaviorPreferencesAtom } from "../preferences/atoms";
-import { useProfileQuery } from "../user/profileQueries";
+
 import { requireAccountAtom } from "../user/sessionAtoms";
 import { useSearchPostsQuery } from "./queries";
+import { useProfileQuery } from "../user/profile-queries";
+import { bskyApi } from "@/lib/api";
+import { AutocompleteUsers } from "../user/autocomplete";
+import { Drawer } from "../panes/drawer";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =

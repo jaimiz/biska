@@ -28,7 +28,7 @@ import {
 	AuthorFeedFilters,
 	useProfilePosts,
 	useProfileQuery,
-} from "@/features/user/profileQueries";
+} from "./profile-queries";
 
 export function Profile() {
 	const { handleOrDid } = useParams();

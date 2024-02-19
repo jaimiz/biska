@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
 import { ClassValue } from "clsx";
-import { SmartLink } from "../link";
 import { atom, useSetAtom } from "jotai";
+import { SmartLink } from "../ui/link";
 
 type ProfileDisplayNameProps = {
 	profile: ProfileViewDetailed;

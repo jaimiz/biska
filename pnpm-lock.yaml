@@ -129,7 +129,7 @@ devDependencies:
     version: 8.0.3
   jotai-devtools:
     specifier: 0.7.0
-    version: 0.7.0(@emotion/react@11.11.1)(@types/react@18.2.37)(react-dom@18.2.0)(react@18.2.0)(redux@5.0.1)
+    version: 0.7.0(@emotion/react@11.11.1)(@types/react@18.2.37)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1)
   lint-staged:
     specifier: 15.2.0
     version: 15.2.0
@@ -3111,14 +3111,14 @@ packages:
       '@babel/runtime': 7.23.2
     dev: false
 
-  /@redux-devtools/extension@3.2.6(redux@5.0.1):
+  /@redux-devtools/extension@3.2.6(redux@4.2.1):
     resolution: {integrity: sha512-fWrqYAoFFKc5+78P/xWj+3NcoiJ07ak5qdiPTbO5CAuM5vE3dKk5fajpJyuOab+hLNEUJMTklCBYm+WTFcWWxA==}
     peerDependencies:
       redux: ^3.1.0 || ^4.0.0
     dependencies:
       '@babel/runtime': 7.23.2
       immutable: 4.3.4
-      redux: 5.0.1
+      redux: 4.2.1
     dev: true
 
   /@remix-run/router@1.12.0:
@@ -4895,7 +4895,7 @@ packages:
     resolution: {integrity: sha512-gFqAIbuKyyso/3G2qhiO2OM6shY6EPP/R0+mkDbyspxKazh8BXDC5FiFsUjlczgdNz/vfra0da2y+aHrusLG/Q==}
     hasBin: true
 
-  /jotai-devtools@0.7.0(@emotion/react@11.11.1)(@types/react@18.2.37)(react-dom@18.2.0)(react@18.2.0)(redux@5.0.1):
+  /jotai-devtools@0.7.0(@emotion/react@11.11.1)(@types/react@18.2.37)(react-dom@18.2.0)(react@18.2.0)(redux@4.2.1):
     resolution: {integrity: sha512-rMcNusiJ3YtvbVkUF6RrUa1mJZbcH7Cs6MGULHllTQ/+4/kKtWtEPXUMdwxyJ33Sdx/L0Al8b0g0NpLOPUr0zA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -4906,7 +4906,7 @@ packages:
       '@mantine/core': 6.0.21(@emotion/react@11.11.1)(@mantine/hooks@6.0.21)(@types/react@18.2.37)(react-dom@18.2.0)(react@18.2.0)
       '@mantine/hooks': 6.0.21(react@18.2.0)
       '@mantine/prism': 6.0.21(@mantine/core@6.0.21)(@mantine/hooks@6.0.21)(react-dom@18.2.0)(react@18.2.0)
-      '@redux-devtools/extension': 3.2.6(redux@5.0.1)
+      '@redux-devtools/extension': 3.2.6(redux@4.2.1)
       javascript-stringify: 2.1.0
       jsondiffpatch: 0.5.0
       react: 18.2.0
@@ -5756,8 +5756,10 @@ packages:
     dependencies:
       picomatch: 2.3.1
 
-  /redux@5.0.1:
-    resolution: {integrity: sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==}
+  /redux@4.2.1:
+    resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
+    dependencies:
+      '@babel/runtime': 7.23.9
     dev: true
 
   /regenerate-unicode-properties@10.1.1:

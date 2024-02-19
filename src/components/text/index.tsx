@@ -3,7 +3,7 @@ import { AppBskyRichtextFacet, RichText as RichTextAPI } from "@atproto/api";
 import { VariantProps, cva } from "class-variance-authority";
 import { ClassValue } from "clsx";
 import { PropsWithChildren } from "react";
-import { SmartLink } from "../link";
+import { SmartLink } from "../ui/link";
 
 const richTextVariants = cva("", {
 	variants: {
@@ -54,7 +54,6 @@ export function RichText({ richText, className, format }: RichTextProps) {
 		const link = segment.link;
 		const mention = segment.mention;
 		if (mention && AppBskyRichtextFacet.validateMention(mention).success) {
-			console.log("valid", { mention });
 			els.push(
 				<SmartLink key={key} to={`/profile/${mention.did}`}>
 					{segment.text}

@@ -1,4 +1,4 @@
-import { getAgent } from "@/services/api";
+import { getAgent } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 
 const timelineKeys = {

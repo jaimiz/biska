@@ -1,11 +1,11 @@
-import { getAgent } from "@/services/api";
 import { AppBskyFeedSearchPosts } from "@atproto/api";
 import {
 	InfiniteData,
 	QueryKey,
 	useInfiniteQuery,
 } from "@tanstack/react-query";
-import { postKeys } from "../posts/queries";
+import { postKeys } from "../feed/post-queries";
+import { getAgent } from "@/lib/api";
 
 export function useSearchPostsQuery({ query }: { query: string }) {
 	return useInfiniteQuery<

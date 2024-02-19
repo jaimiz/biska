@@ -1,4 +1,4 @@
-import { Centered } from "./layouts/Centered";
+import { Centered } from "@/components/layouts/Centered";
 import { BlueskyLogin } from "./login-bluesky";
 
 export function LoginScreen() {

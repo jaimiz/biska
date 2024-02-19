@@ -2,11 +2,6 @@ import { makeHandleLink } from "@/lib/strings/handle";
 import { cn } from "@/lib/utils";
 import { Did } from "@/state/schema";
 
-import { usePost } from "@/features/posts/queries";
-import {
-	SkylineSliceItem,
-	useProfileQuery,
-} from "@/features/user/profileQueries";
 import {
 	AppBskyEmbedExternal,
 	AppBskyEmbedImages,
@@ -22,22 +17,22 @@ import { SiSpotify } from "@icons-pack/react-simple-icons";
 import { ClassValue } from "clsx";
 import { PlayCircleIcon, ReplyIcon } from "lucide-react";
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
-import { ContainerLink, SmartLink } from "../link";
+
 import { RichText } from "../text";
 import { TimeElapsed } from "../text/time-elapsed";
+import { ContainerLink, SmartLink } from "../ui/link";
 import { UserAvatar } from "../user/avatar";
 import { ProfileDisplayName } from "../user/profile-display-name";
+import { SkylineSliceItem, useProfileQuery } from "../user/profile-queries";
 import { PostControls } from "./post-controls";
 
 type PostProps = SkylineSliceItem;
 export function Post({ post }: PostProps) {
-	const { data: postData } = usePost(post.uri);
-
 	const record = useMemo<AppBskyFeedPost.Record | undefined>(
 		() =>
-			AppBskyFeedPost.isRecord(postData?.record) &&
-			AppBskyFeedPost.validateRecord(postData?.record).success
-				? postData?.record
+			AppBskyFeedPost.isRecord(post?.record) &&
+			AppBskyFeedPost.validateRecord(post?.record).success
+				? post?.record
 				: undefined,
 		[post],
 	);
@@ -52,7 +47,7 @@ export function Post({ post }: PostProps) {
 		return rt;
 	}, [record]);
 
-	if (!postData || !record || !postText) return null;
+	if (!post || !record || !postText) return null;
 
 	return (
 		<div
@@ -75,7 +70,7 @@ export function Post({ post }: PostProps) {
 				{record.text ? <RichText richText={postText} /> : null}
 				{post.embed && <PostEmbed embed={post.embed} />}
 				<div className="flex justify-between">
-					<PostControls post={postData} />
+					<PostControls post={post} />
 				</div>
 			</div>
 		</div>
@@ -191,7 +186,10 @@ function EmbedImages({ images }: EmbedImageProps) {
 				<div className="grid grid-cols-2 gap-1">
 					{images.map((image, index) => {
 						return (
-							<div className="aspect-square" key={`gallery-thumb-${index}`}>
+							<div
+								className="aspect-square"
+								key={`gallery-thumb-${image.thumb}`}
+							>
 								<GalleryImage
 									className={cn("rounded-none", borders[index])}
 									image={image}

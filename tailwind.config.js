@@ -1,5 +1,3 @@
-const plugin = require("tailwindcss/plugin");
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
 	darkMode: ["class"],
@@ -13,19 +11,22 @@ module.exports = {
 			},
 		},
 		extend: {
+			spacing: {
+				120: "30rem",
+			},
 			colors: {
 				goldenrod: {
-					'50': '#fffaeb',
-					'100': '#ffefc6',
-					'200': '#fed872',
-					'300': '#fec74b',
-					'400': '#fdb022',
-					'500': '#f78e09',
-					'600': '#db6804',
-					'700': '#b64607',
-					'800': '#93360d',
-					'900': '#792d0e',
-					'950': '#461502',
+					50: "#fffaeb",
+					100: "#ffefc6",
+					200: "#fed872",
+					300: "#fec74b",
+					400: "#fdb022",
+					500: "#f78e09",
+					600: "#db6804",
+					700: "#b64607",
+					800: "#93360d",
+					900: "#792d0e",
+					950: "#461502",
 				},
 				border: "hsl(var(--border))",
 				input: "hsl(var(--input))",
@@ -82,7 +83,5 @@ module.exports = {
 			},
 		},
 	},
-	plugins: [
-		require("tailwindcss-animate"),
-	],
+	plugins: [require("tailwindcss-animate")],
 };

@@ -3,20 +3,22 @@ import { useAtomValue } from "jotai";
 import { useEffect, useState } from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { Centered } from "./components/layouts/Centered";
-import { LoginScreen } from "./components/login-screen";
+
 import { Toaster } from "./components/ui/sonner";
 import { Spinner } from "./components/ui/spinner";
-import {
-	currentAccountAtom,
-	sessionStateAtom,
-} from "./features/user/sessionAtoms";
+
 import { TimeTickProvider } from "./lib/clock";
 import { queryClient } from "./lib/react-query";
 import { useReloadPrompt } from "./lib/useServiceWorker";
-import { bskyApi } from "./services/api";
 import { persisted } from "./state/state";
-import { DashboardView } from "./views/Dashboard";
-import { Search } from "./features/search/page";
+import { LoginScreen } from "./views/login-screen";
+import { Search } from "./components/search/page";
+import {
+	currentAccountAtom,
+	sessionStateAtom,
+} from "./components/user/sessionAtoms";
+import { bskyApi } from "./lib/api";
+import { MultiColumnView } from "./views/MultiColumn";
 
 function LoadingScreen() {
 	return (
@@ -31,7 +33,7 @@ function LoadingScreen() {
 export function AppRouter() {
 	const router = createBrowserRouter([
 		{
-			errorElement: <DashboardView />,
+			errorElement: <MultiColumnView />,
 		},
 		{
 			path: "/search",

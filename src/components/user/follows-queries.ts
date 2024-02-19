@@ -1,9 +1,9 @@
 import { STALE } from "@/lib/queries";
-import { getAgent } from "@/services/api";
 import { AppBskyActorDefs } from "@atproto/api";
 import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { requireAccountAtom } from "./sessionAtoms";
+import { getAgent } from "@/lib/api";
 
 // sanity limit is SANITY_PAGE_LIMIT*PAGE_SIZE total records
 const SANITY_PAGE_LIMIT = 1000;

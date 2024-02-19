@@ -31,6 +31,7 @@ export type Session = z.infer<typeof sessionSchema>;
 const preferencesSchema = z.object({
 	interface: z.object({
 		profilePictureStyle: z.enum(["round", "square"]).default("square"),
+		columnSize: z.enum(["sm", "md", "lg"]).default("md"),
 	}),
 	behavior: z.object({
 		openProfileIn: z.enum(["app", "bsky"]).default("app"),
@@ -77,6 +78,7 @@ export const defaultAppSchema: AppSchema = {
 	preferences: {
 		interface: {
 			profilePictureStyle: "square",
+			columnSize: "md",
 		},
 		behavior: {
 			openProfileIn: "bsky",

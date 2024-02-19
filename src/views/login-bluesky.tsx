@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Cloud } from "lucide-react";
 import { useState } from "react";
+
+import { AlertCircle } from "lucide-react";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	Dialog,
 	DialogClose,
@@ -10,15 +14,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-
-import { AlertCircle } from "lucide-react";
-
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Spinner } from "./ui/spinner";
-import { BSKY_SOCIAL_SERVICE, bskyApi } from "@/services/api";
+} from "@/components/ui/dialog";
+import { BSKY_SOCIAL_SERVICE, bskyApi } from "@/lib/api";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 export function AlertDestructive() {
 	return (

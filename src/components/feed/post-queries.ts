@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getAgent } from "@/services/api";
 import { AppBskyFeedDefs } from "@atproto/api";
-import { SkylineSliceItem } from "../user/profileQueries";
 import { useAtomValue } from "jotai";
 import { postsCacheAtom, updatePostAtom } from "@/lib/cache";
+import { getAgent } from "@/lib/api";
+import { SkylineSliceItem } from "../user/profile-queries";
 
 export const postKeys = {
 	all: ["posts"] as const,

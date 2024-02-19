@@ -1,10 +1,3 @@
-import {
-	usePostLikeMutation,
-	usePostRepostMutation,
-	usePostUnlikeMutation,
-	usePostUnrepostMutation,
-} from "@/features/posts/queries";
-import { SkylineSliceItem } from "@/features/user/profileQueries";
 import { cn } from "@/lib/utils";
 import { ClassValue } from "clsx";
 import {
@@ -15,6 +8,13 @@ import {
 	Repeat2Icon,
 	StarIcon,
 } from "lucide-react";
+import { SkylineSliceItem } from "../user/profile-queries";
+import {
+	usePostLikeMutation,
+	usePostRepostMutation,
+	usePostUnlikeMutation,
+	usePostUnrepostMutation,
+} from "./post-queries";
 
 type CounterIconProps = {
 	count?: number;
