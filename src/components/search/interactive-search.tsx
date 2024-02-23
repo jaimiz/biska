@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { buildSearchQuery } from "@/lib/search-parser";
-import { useState } from "react";
-import { useSearchPostsQuery } from "./queries";
-import { BskyAppLink } from "../ui/link";
-import { Column, ColumnContent, ColumnHeader } from "../panes/column";
 import { cn } from "@/lib/utils";
 import { atom, useAtomValue } from "jotai";
-import { isLoggedInAtom } from "../user/sessionAtoms";
+import { BetweenVerticalEnd } from "lucide-react";
+import { useState } from "react";
+import { Column, ColumnContent, ColumnHeader } from "../panes/column";
+import { addColumn, createColumn } from "../panes/columns";
+import { isLoggedInAtom, requireAccountAtom } from "../user/sessionAtoms";
+import { useSearchPostsQuery } from "./queries";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
@@ -81,6 +82,7 @@ export function InteractiveSearch() {
 	const [searchTerms, setSearchTerms] = useState("");
 	const [query, setQuery] = useState("");
 	const [searchType] = useState<"all" | "me" | "user">("all");
+	const currentAccount = useAtomValue(requireAccountAtom);
 
 	return (
 		<Column
@@ -90,7 +92,7 @@ export function InteractiveSearch() {
 			})}
 		>
 			<ColumnHeader title="Buscar" icon="interactiveSearch" />
-			<ColumnContent>
+			<ColumnContent className="gap-y-4">
 				<div className="flex w-full justify-center items-center gap-x-4">
 					<input type="hidden" name="q" value={query} />
 					<Input
@@ -127,15 +129,24 @@ export function InteractiveSearch() {
 
 				{query ? (
 					<>
-						<div className="text-sm text-right max-w-full">
-							<BskyAppLink
-								to={`/search?q=${query}`}
-								target="_blank"
-								rel="noopener noreferrer"
+						<div className="text-right max-w-full">
+							<Button
 								className="inline-flex items-center gap-1"
+								title="Criar coluna com busca"
+								onClick={() => {
+									addColumn(
+										createColumn.search({
+											account: currentAccount.did,
+											query,
+										}),
+									);
+								}}
 							>
-								Abrir busca no Bsky.app
-							</BskyAppLink>
+								<span className="group-hover:not-sr-only">
+									Adicionar coluna
+								</span>
+								<BetweenVerticalEnd />
+							</Button>
 						</div>
 						<SearchResults query={query} />
 					</>

@@ -3,22 +3,26 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
 import { Toaster } from "./components/ui/sonner";
 
-import { useAtomValue, useSetAtom } from "jotai";
 import { Suspense, useEffect } from "react";
 import { TimeTickProvider } from "./lib/clock";
 import { queryClient } from "./lib/react-query";
-import { storageAppStateAtom } from "./state/state";
 import { MultiColumnView } from "./views/MultiColumnLayout";
+import { BISKA_STORAGE_KEY, appStateAtom } from "./state/state";
+import { useAtom } from "jotai";
+import localforage from "localforage";
+import { AppSchema } from "./state/schema";
 
 export function App() {
-	const storageAppState = useAtomValue(storageAppStateAtom);
-	const setMemoryAppState = useSetAtom(storageAppStateAtom);
+	const [, setAppstate] = useAtom(appStateAtom);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: I just want to run this on mount
 	useEffect(() => {
-		setMemoryAppState(storageAppState);
-	}, []);
-
+		(async () => {
+			const rawData = await localforage.getItem<unknown>(BISKA_STORAGE_KEY);
+			if (AppSchema.safeParse(rawData).success) {
+				setAppstate(rawData as AppSchema);
+			}
+		})();
+	}, [setAppstate]);
 	const router = createBrowserRouter([
 		{
 			path: "/",

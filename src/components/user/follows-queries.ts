@@ -3,7 +3,7 @@ import { AppBskyActorDefs } from "@atproto/api";
 import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { requireAccountAtom } from "./sessionAtoms";
-import { getAgent } from "@/lib/api";
+import { getAgent } from "@/lib/agent";
 
 // sanity limit is SANITY_PAGE_LIMIT*PAGE_SIZE total records
 const SANITY_PAGE_LIMIT = 1000;
@@ -23,7 +23,7 @@ export function useMyFollowsQuery() {
 			let cursor: string | undefined = undefined;
 			let arr: AppBskyActorDefs.ProfileViewBasic[] = [];
 			for (let i = 0; i < SANITY_PAGE_LIMIT; i++) {
-				const res = await getAgent().getFollows({
+				const res = await getAgent(currentAccount.did).getFollows({
 					actor: currentAccount.did,
 					cursor,
 					limit: PAGE_SIZE,

@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { STALE } from "@/lib/queries";
 import { useMyFollowsQuery } from "./follows-queries";
-import { getAgent } from "@/lib/api";
+import { getAgent } from "@/lib/agent";
 
 export const RQKEY = (prefix: string) => ["actor-autocomplete", prefix];
 
@@ -24,6 +24,7 @@ export function useActorAutocompleteQuery(prefix: string) {
 		staleTime: STALE.MINUTES.ONE,
 		queryKey: autocompleteKeys.prefix(prefix),
 		async queryFn() {
+			// TODO: Figure out how to pass the did to getAgent here
 			const res = prefix
 				? await getAgent().searchActorsTypeahead({
 						term: prefix,

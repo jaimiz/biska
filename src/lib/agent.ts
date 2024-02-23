@@ -1,21 +1,34 @@
+import { upsertAccountAtom } from "@/components/user/sessionAtoms";
 import type { Did, PersistedAccount, Session } from "@/state/schema";
-import {
-	atomStore,
-	memoryAppStateAtom,
-	storageAppStateAtom,
-} from "@/state/state";
+import { appStateAtom, atomStore } from "@/state/state";
 import { dashboardSidebarExpanded } from "@/views/MultiColumnLayout";
 import { AtpPersistSessionHandler, BskyAgent } from "@atproto/api";
+import { atom } from "jotai";
+import { atomFamily } from "jotai/utils";
+
+const agentsAtom = atom<Record<Did, BskyAgent>>({});
+const agentsFamily = atomFamily((did: Did) =>
+	atom(
+		(get) => get(agentsAtom)[did as Did],
+		(get, set, agent: BskyAgent) => {
+			const prev = get(agentsAtom);
+			set(agentsAtom, {
+				...prev,
+				[did]: agent,
+			});
+		},
+	),
+);
+
+export const BSKY_SOCIAL_SERVICE = "https://bsky.social";
 
 export const PUBLIC_BSKY_AGENT = new BskyAgent({
 	service: "https://api.bsky.app",
 });
 
-export const BSKY_SOCIAL_SERVICE = "https://bsky.social";
-
 let __currentAgent: BskyAgent = PUBLIC_BSKY_AGENT;
 
-export function getAgent() {
+export function getAgent(_?: Did) {
 	return __currentAgent;
 }
 
@@ -33,9 +46,9 @@ export type ApiMethods = {
 };
 
 export function setSessionAndPersist(fn: (prev: Session) => Session) {
-	const prev = atomStore.get(memoryAppStateAtom).session;
+	const prev = atomStore.get(appStateAtom).session;
 	const { currentAccount, accounts } = fn(prev);
-	atomStore.set(storageAppStateAtom, {
+	atomStore.set(appStateAtom, {
 		session: {
 			currentAccount,
 			accounts,
@@ -48,9 +61,9 @@ export function setSessionAndPersist(fn: (prev: Session) => Session) {
 }
 
 export function setSession(fn: (prev: Session) => Session) {
-	const prev = atomStore.get(memoryAppStateAtom).session;
+	const prev = atomStore.get(appStateAtom).session;
 	const session = fn(prev);
-	atomStore.set(storageAppStateAtom, {
+	atomStore.set(appStateAtom, {
 		session,
 	});
 	return session;
@@ -82,14 +95,6 @@ function createPersistSessionHandler(
 	};
 }
 
-const upsertAccount = (account: PersistedAccount, expired = false) => {
-	setSessionAndPersist((prev) => ({
-		...prev,
-		currentAccount: expired ? undefined : account,
-		accounts: [account, ...prev.accounts.filter((a) => a.did !== account.did)],
-	}));
-};
-
 const login: ApiMethods["login"] = async ({
 	service,
 	identifier,
@@ -103,6 +108,10 @@ const login: ApiMethods["login"] = async ({
 		throw new Error(`session: login failed to establish a session`);
 	}
 
+	const agentAtom = agentsFamily(agent.session.did as Did);
+
+	atomStore.set(agentAtom, agent);
+
 	const account: PersistedAccount = {
 		service: agent.service.toString(),
 		did: agent.session.did as Did,
@@ -114,14 +123,8 @@ const login: ApiMethods["login"] = async ({
 		accessJwt: agent.session.accessJwt,
 	};
 
-	agent.setPersistSessionHandler(
-		createPersistSessionHandler(account, ({ expired, refreshedAccount }) => {
-			upsertAccount(refreshedAccount, expired);
-		}),
-	);
-
 	__currentAgent = agent;
-	upsertAccount(account);
+	atomStore.set(upsertAccountAtom, account);
 };
 
 const removeAccount: ApiMethods["removeAccount"] = (account) => {
@@ -154,7 +157,7 @@ const initSession = async (account: PersistedAccount) => {
 		persistSession: createPersistSessionHandler(
 			account,
 			({ expired, refreshedAccount }) => {
-				upsertAccount(refreshedAccount, expired);
+				atomStore.set(upsertAccountAtom, refreshedAccount, expired);
 			},
 		),
 	});
@@ -183,7 +186,7 @@ const initSession = async (account: PersistedAccount) => {
 	};
 
 	__currentAgent = agent;
-	upsertAccount(freshAccount);
+	atomStore.set(upsertAccountAtom, freshAccount);
 };
 
 const resumeSession: ApiMethods["resumeSession"] = async (account) => {

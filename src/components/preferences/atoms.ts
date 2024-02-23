@@ -1,15 +1,17 @@
 import { Preferences } from "@/state/schema";
-import { memoryAppStateAtom, storageAppStateAtom } from "@/state/state";
+import { appStateAtom } from "@/state/state";
 import { WritableAtom, atom } from "jotai";
+import { atomEffect } from "jotai-effect";
+import { isLoggedInAtom } from "../user/sessionAtoms";
 
 export const preferencesAtom = atom(
 	(get) => {
-		return get(memoryAppStateAtom).preferences;
+		return get(appStateAtom).preferences;
 	},
 	(get, set, update: Partial<Preferences>) => {
-		const prev = get(memoryAppStateAtom);
+		const prev = get(appStateAtom);
 		const prefs = prev.preferences;
-		set(storageAppStateAtom, {
+		set(appStateAtom, {
 			preferences: {
 				...prefs,
 				...update,
@@ -48,3 +50,12 @@ export const interfacePreferencesAtom = deriveAtomProperty(
 	preferencesAtom,
 	"interface",
 );
+
+export const prefsPaneIsOpenAtom = atom(false);
+
+export const effectResetPrefsPaneOnLogout = atomEffect((get, set) => {
+	const loggedIn = get(isLoggedInAtom);
+	if (!loggedIn) {
+		set(prefsPaneIsOpenAtom, false);
+	}
+});

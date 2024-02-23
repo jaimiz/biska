@@ -5,7 +5,6 @@ import {
 } from "@/components/search/interactive-search";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { isLoggedInAtom } from "@/components/user/sessionAtoms";
-import { bskyApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { atom, useAtom, useAtomValue } from "jotai";
 import {
@@ -17,6 +16,11 @@ import {
 import { ButtonHTMLAttributes, forwardRef, useCallback } from "react";
 import { DeckView } from "./DeckView";
 import { EmptyView } from "./EmptyView";
+import { bskyApi } from "@/lib/agent";
+import {
+	prefsPaneIsOpenAtom,
+	effectResetPrefsPaneOnLogout,
+} from "@/components/preferences/atoms";
 
 export const dashboardSidebarExpanded = atom(false);
 function DashboardSidebar() {
@@ -56,6 +60,8 @@ function DashboardSidebar() {
 			);
 		},
 	);
+
+	useAtom(effectResetPrefsPaneOnLogout);
 	const [expanded, setExpanded] = useAtom(dashboardSidebarExpanded);
 
 	const toggleExpanded = useCallback(() => {
@@ -69,6 +75,7 @@ function DashboardSidebar() {
 	}, [setInteractiveSearchOpen]);
 
 	const isLoggedIn = useAtomValue(isLoggedInAtom);
+	const [isPrefsPaneOpen, setPrefPaneOpen] = useAtom(prefsPaneIsOpenAtom);
 
 	return (
 		<div
@@ -100,7 +107,10 @@ function DashboardSidebar() {
 					"hover:w-auto": isLoggedIn,
 				})}
 			>
-				<Sheet>
+				<Sheet
+					open={isLoggedIn && isPrefsPaneOpen}
+					onOpenChange={setPrefPaneOpen}
+				>
 					<SheetTrigger asChild>
 						<SidebarButton
 							disabled={!isLoggedIn}

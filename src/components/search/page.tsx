@@ -21,12 +21,12 @@ import { useEffect, useRef, useState } from "react";
 import { Form, Outlet, useSearchParams } from "react-router-dom";
 import { behaviorPreferencesAtom } from "../preferences/atoms";
 
+import { bskyApi } from "@/lib/agent";
+import { Drawer } from "../panes/drawer";
+import { AutocompleteUsers } from "../user/autocomplete";
+import { useProfileQuery } from "../user/profile-queries";
 import { requireAccountAtom } from "../user/sessionAtoms";
 import { useSearchPostsQuery } from "./queries";
-import { useProfileQuery } from "../user/profile-queries";
-import { bskyApi } from "@/lib/api";
-import { AutocompleteUsers } from "../user/autocomplete";
-import { Drawer } from "../panes/drawer";
 
 function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =

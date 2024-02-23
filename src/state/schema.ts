@@ -48,18 +48,14 @@ export type AppMeta = z.infer<typeof appMetaSchema>;
 
 /* General Schema */
 
-export const StorageSchema = z.object({
+export const AppSchema = z.object({
 	session: sessionSchema,
 	preferences: preferencesSchema,
 	meta: appMetaSchema,
 });
 
-export const AppSchema = StorageSchema;
-
-export type StorageSchema = z.infer<typeof StorageSchema>;
 export type AppSchema = z.infer<typeof AppSchema>;
 
-export type StorageSchemaKey = keyof StorageSchema;
 export type AppSchemaKey = keyof AppSchema;
 
 export const defaultAppSchema: AppSchema = {

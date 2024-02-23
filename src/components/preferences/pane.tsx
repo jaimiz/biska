@@ -1,27 +1,32 @@
-import {
-	SheetContent,
-	SheetDescription,
-	SheetTitle,
-} from "@/components/ui/sheet";
+import { SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAtom, useSetAtom } from "jotai";
-import { interfacePreferencesAtom, preferencesAtom } from "./atoms";
 import { Preferences } from "@/state/schema";
+import { BlueskyLogin } from "@/views/login-bluesky";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { Trash } from "lucide-react";
+import { accountsAtom, removeAccountAtom } from "../user/sessionAtoms";
+import { interfacePreferencesAtom, preferencesAtom } from "./atoms";
 
 export function PreferencesDrawer() {
 	const [preferences, setPreferences] = useAtom(preferencesAtom);
 	const setInterfacePreferences = useSetAtom(interfacePreferencesAtom);
+	const accounts = useAtomValue(accountsAtom);
+	const removeAccount = useSetAtom(removeAccountAtom);
 	return (
 		<SheetContent
 			side={"right"}
 			className="w-full max-w-none overflow-y-auto sm:max-w-none lg:w-1/3"
 		>
 			<SheetTitle>Preferências</SheetTitle>
-			<SheetDescription className="flex flex-col gap-3">
+			<div className="flex flex-col gap-3 text-sm">
 				<div className="flex flex-col gap-2 w-full">
-					<h3 className="text-md text-foreground font-semibold">
+					<div
+						role="heading"
+						aria-level={3}
+						className="text-md text-foreground font-semibold"
+					>
 						Visualizar perfis
-					</h3>
+					</div>
 					<Tabs
 						value={preferences.behavior.openProfileIn}
 						className="flex items-center w-full"
@@ -48,16 +53,20 @@ export function PreferencesDrawer() {
 							</TabsTrigger>
 						</TabsList>
 					</Tabs>
-					<p className="text-xs text-muted-foreground">
+					<div className="text-xs text-muted-foreground">
 						{preferences.behavior.openProfileIn === "app"
 							? "Quando você clicar num perfil, ele vai aparecer na parte direita da tela, da mesma forma que o painel de preferências está aparecendo agora."
 							: "Quando você clicar num perfil, ele vai abrir o perfil do usuário no bsky.app. O perfil será aberto numa nova aba, pra que você não perca o resultado da busca."}
-					</p>{" "}
+					</div>{" "}
 				</div>
 				<div className="flex flex-col gap-2 w-full">
-					<h3 className="text-md text-foreground font-semibold">
+					<div
+						role="heading"
+						aria-level={3}
+						className="text-md text-foreground font-semibold"
+					>
 						Tamanho das colunas
-					</h3>
+					</div>
 					<Tabs
 						value={preferences.interface.columnSize}
 						className="flex items-center w-full"
@@ -89,7 +98,30 @@ export function PreferencesDrawer() {
 						</TabsList>
 					</Tabs>
 				</div>
-			</SheetDescription>
+				<div className="flex flex-col gap-2 w-full">
+					<div
+						role="heading"
+						aria-level={3}
+						className="text-md text-foreground font-semibold"
+					>
+						Adicionar conta
+					</div>
+					<BlueskyLogin />
+					{accounts.map((account) => (
+						<div key={`account-${account.did}`}>
+							{account.handle}
+							<button
+								type="button"
+								onClick={() => {
+									removeAccount(account);
+								}}
+							>
+								<Trash />
+							</button>
+						</div>
+					))}
+				</div>
+			</div>
 		</SheetContent>
 	);
 }

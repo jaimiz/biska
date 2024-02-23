@@ -1,4 +1,4 @@
-import { getAgent } from "@/lib/api";
+import { getAgent } from "@/lib/agent";
 import { isBlockedByError, isBlockingError } from "@/lib/errors";
 import { Did } from "@/state/schema";
 import { AppBskyFeedDefs, AppBskyFeedGetAuthorFeed } from "@atproto/api";
@@ -22,7 +22,7 @@ export function useProfileQuery({ did }: { did: Did }) {
 	return useQuery({
 		queryKey: profileKeys.detail(did),
 		queryFn: async () => {
-			const res = await getAgent().getProfile({ actor: did ?? "" });
+			const res = await getAgent(did).getProfile({ actor: did ?? "" });
 			return res.data as ProfileViewDetailed;
 		},
 		enabled: !!did,

@@ -1,44 +1,40 @@
 import { atom, getDefaultStore } from "jotai";
 import * as localforage from "localforage";
-import { AppSchema, StorageSchema, defaultAppSchema } from "./schema.ts";
+import { AppSchema, defaultAppSchema } from "./schema.ts";
 
-const BISKA_STORAGE_VERSION = "0.0.0";
+export const BISKA_STORAGE_VERSION = "0.0.0";
 export const BISKA_STORAGE_KEY = "BISKA";
 localforage.config({
 	name: `${BISKA_STORAGE_KEY}_v${BISKA_STORAGE_VERSION}`,
 });
 
 export const atomStore = getDefaultStore();
-export const memoryAppStateAtom = atom<AppSchema>(defaultAppSchema);
 
-export const storageAppStateAtom = atom(
-	async (get) => {
-		const rawData = await localforage.getItem<unknown>(BISKA_STORAGE_KEY);
-		if (StorageSchema.safeParse(rawData).success) {
-			return rawData as AppSchema;
-		}
-		return get(memoryAppStateAtom);
+const stateAtom = atom(defaultAppSchema);
+type StateUpdate = Partial<AppSchema> | ((prev: AppSchema) => AppSchema);
+
+/*
+ * This atom handles both in memory state and persistent storage all in one
+ * Whenever you `get` from it, it will return the current memory state.
+ * Whenever you `set`, it updates the in-memory state and writes to persistent storage
+ * If writing fails, it logs but does not fail as we don't want to break the app
+ * in this case
+ */
+export const appStateAtom = atom(
+	(get) => {
+		return get(stateAtom);
 	},
-	(get, set, update: Partial<AppSchema>) => {
-		const prev = get(memoryAppStateAtom);
-		const next = {
-			...prev,
-			...update,
-		};
-		const parsed = StorageSchema.parse(next);
-		set(memoryAppStateAtom, parsed);
-		localforage
-			.setItem(BISKA_STORAGE_KEY, { ...prev, ...update })
-			.catch((e) => {
-				console.error("Error writing to persistent storage", e);
-				console.error(update);
-			});
+	(get, set, update: StateUpdate) => {
+		const prev = get(stateAtom);
+		const next =
+			typeof update === "function" ? update(prev) : { ...prev, ...update };
+		const parsed = AppSchema.parse(next);
+		set(stateAtom, {
+			...parsed,
+		});
+		localforage.setItem(BISKA_STORAGE_KEY, parsed).catch((e) => {
+			console.error("Error writing to persistent storage", e);
+			console.error(update);
+		});
 	},
 );
-
-export const initializeStoredState = (state: StorageSchema | undefined) => {
-	return {
-		...defaultAppSchema,
-		...state,
-	};
-};

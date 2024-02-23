@@ -53,6 +53,9 @@ dependencies:
   jotai:
     specifier: 2.5.1
     version: 2.5.1(@types/react@18.2.37)(react@18.2.0)
+  jotai-effect:
+    specifier: 0.5.0
+    version: 0.5.0(jotai@2.5.1)
   jotai-optics:
     specifier: 0.3.2
     version: 0.3.2(jotai@2.5.1)(optics-ts@2.4.1)
@@ -4918,6 +4921,14 @@ packages:
       - react-dom
       - redux
     dev: true
+
+  /jotai-effect@0.5.0(jotai@2.5.1):
+    resolution: {integrity: sha512-3ZuJxc2t8S7OjYc0FcI21BIm8a4nOeK1GQPSq8Hzt5mcC0YxjAVEMXdF+C8wHJEiuRevtcjBfWyVBeCUuTENJA==}
+    peerDependencies:
+      jotai: '>=2.5.0'
+    dependencies:
+      jotai: 2.5.1(@types/react@18.2.37)(react@18.2.0)
+    dev: false
 
   /jotai-optics@0.3.2(jotai@2.5.1)(optics-ts@2.4.1):
     resolution: {integrity: sha512-RH6SvqU5hmkVqnHmaqf9zBXvIAs4jLxkDHS4fr5ljuBKHs8+HQ02v+9hX7ahTppxx6dUb0GGUE80jQKJ0kFTLw==}

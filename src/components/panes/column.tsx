@@ -56,11 +56,17 @@ export function ColumnHeader(props: ColumnHeaderProps) {
 	);
 }
 
-export function ColumnContent({ children }: PropsWithChildren) {
+export function ColumnContent({
+	children,
+	className,
+}: PropsWithChildren<{
+	className?: ClassValue;
+}>) {
 	const { size } = useColumnConfig();
 	return (
 		<div
 			className={cn(
+				className,
 				"flex shrink-0 flex-col bg-background w-full",
 				getColumnSpacing(size),
 			)}

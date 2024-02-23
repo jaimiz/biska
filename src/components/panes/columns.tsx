@@ -1,47 +1,43 @@
 import { Did } from "@/state/schema";
+import { atomStore } from "@/state/state";
 import { atomWithStorage } from "jotai/utils";
-import { InteractiveSearch } from "../search/interactive-search";
-import { Column, ColumnContent, ColumnHeader } from "./column";
+import { SearchPane } from "./search-column";
 
 type CommonColumn = {
 	account: Did;
+	title: string;
 };
 
-type InteractiveSearchColumn = CommonColumn & {
-	type: "interactiveSearch";
-	title: "Busca";
+export type SearchColumn = CommonColumn & {
+	type: "search";
+	query: string;
 };
 
-export type ColumnConfig = InteractiveSearchColumn;
-export const columnsAtom = atomWithStorage<ColumnConfig[]>("columns", [
-	{ type: "interactiveSearch", title: "Busca", account: "did:plc:test" },
-]);
+export type ColumnConfig = SearchColumn;
+export const columnsAtom = atomWithStorage<ColumnConfig[]>("columns", []);
 
 export const createColumn = {
-	interactiveSearch: (account: Did): InteractiveSearchColumn => ({
-		type: "interactiveSearch",
+	search: ({ query, account }: { query: string; account: Did }) => ({
+		type: "search" as const,
 		title: "Busca",
-		account: account,
+		query,
+		account,
 	}),
 };
 
-const columnComponents = {
-	interactiveSearch: InteractiveSearchColumn,
+export const addColumn = (config: ColumnConfig) => {
+	atomStore.set(columnsAtom, (columns) => [...columns, config]);
 };
 
-function InteractiveSearchColumn(_: InteractiveSearchColumn) {
-	return <InteractiveSearch />;
-}
+const columnComponents = {
+	search: SearchPane,
+};
 
 type DeckColumnProps = {
 	settings: ColumnConfig;
 };
 export function DeckColumn(props: DeckColumnProps) {
-	const ColumnComponent = columnComponents[props.settings.type](props.settings);
-	return (
-		<Column>
-			<ColumnHeader title={props.settings.title} icon={props.settings.type} />
-			<ColumnContent>{ColumnComponent}</ColumnContent>
-		</Column>
-	);
+	const ColumnComponent = columnComponents[props.settings.type];
+	if (!ColumnComponent) return null;
+	return <ColumnComponent {...props.settings} />;
 }

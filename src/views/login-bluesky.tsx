@@ -15,10 +15,10 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { BSKY_SOCIAL_SERVICE, bskyApi } from "@/lib/api";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { BSKY_SOCIAL_SERVICE, bskyApi } from "@/lib/agent";
 
 export function AlertDestructive() {
 	return (
@@ -102,9 +102,9 @@ h-10 rounded-md border border-input bg-background text-sm ring-offset-background
 									type="text"
 								/>
 							</div>
-							<p className="text-sm text-muted-foreground">
+							<div className="text-sm text-muted-foreground">
 								You need to use your full username (e.g. alice.bsky.social)
-							</p>
+							</div>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="password">Password</Label>

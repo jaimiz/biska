@@ -5,7 +5,7 @@ import {
 	useInfiniteQuery,
 } from "@tanstack/react-query";
 import { postKeys } from "../feed/post-queries";
-import { getAgent } from "@/lib/api";
+import { getAgent } from "@/lib/agent";
 
 export function useSearchPostsQuery({ query }: { query: string }) {
 	return useInfiniteQuery<
