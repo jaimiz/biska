@@ -1,3 +1,7 @@
+import {
+	effectResetPrefsPaneOnLogout,
+	prefsPaneIsOpenAtom,
+} from "@/components/preferences/atoms";
 import { PreferencesDrawer } from "@/components/preferences/pane";
 import {
 	InteractiveSearch,
@@ -5,6 +9,7 @@ import {
 } from "@/components/search/interactive-search";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { isLoggedInAtom } from "@/components/user/sessionAtoms";
+import { bskyApi } from "@/lib/agent";
 import { cn } from "@/lib/utils";
 import { atom, useAtom, useAtomValue } from "jotai";
 import {
@@ -15,12 +20,7 @@ import {
 } from "lucide-react";
 import { ButtonHTMLAttributes, forwardRef, useCallback } from "react";
 import { DeckView } from "./DeckView";
-import { EmptyView } from "./EmptyView";
-import { bskyApi } from "@/lib/agent";
-import {
-	prefsPaneIsOpenAtom,
-	effectResetPrefsPaneOnLogout,
-} from "@/components/preferences/atoms";
+import { LoginScreen } from "./login-screen";
 
 export const dashboardSidebarExpanded = atom(false);
 function DashboardSidebar() {
@@ -151,14 +151,11 @@ function DashboardSidebar() {
 			<button
 				type="button"
 				onClick={toggleExpanded}
-				className={cn(
-					"group/expander flex absolute right-0 translate-x-1 top-0 bottom-0 w-4",
-					{
-						hidden: !isLoggedIn,
-					},
-				)}
+				className={cn("flex absolute right-0 translate-x-1 h-8 top-1/2 w-4", {
+					hidden: !isLoggedIn,
+				})}
 			>
-				<div className="m-auto hidden group-hover/expander:block bg-white rounded-full border border-red-50 p-1 pointer-events-auto">
+				<div className="m-auto hidden group-hover:block bg-white rounded-full border border-red-50 p-1 pointer-events-auto">
 					<ArrowRightLeft size={14} />
 				</div>
 			</button>
@@ -177,8 +174,8 @@ export function MultiColumnView() {
 				)}
 			>
 				{isLoggedIn && <InteractiveSearch />}
-				<div className="h-screen flex grow divide-x overflow-x-auto">
-					{isLoggedIn ? <DeckView /> : <EmptyView />}
+				<div className="h-screen flex grow divide-x overflow-x-auto border-r">
+					{isLoggedIn ? <DeckView /> : <LoginScreen />}
 				</div>
 			</div>
 		</div>

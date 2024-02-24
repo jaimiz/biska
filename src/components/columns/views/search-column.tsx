@@ -1,42 +1,42 @@
 import { SearchResults } from "@/components/search/interactive-search";
+import { Button } from "@/components/ui/button";
 import { useColumnContext } from "@/views/DeckView";
+import { Provider } from "jotai";
+import { useState } from "react";
 import { Column, ColumnBody, ColumnHeader } from "./column";
 import { SearchColumnConfig, removeColumn } from "./columns";
-import { Provider, atom, useAtom } from "jotai";
-import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
 
 export function SearchColumn() {
 	const { column, index } = useColumnContext<SearchColumnConfig>();
-	const [isSettingsOpen, toggleSettings] = useAtom(
-		useMemo(() => atom(false), []),
+	const [isSettingsOpen, toggleSettings] = useState(false);
+	return (
+		<>
+			<Column>
+				<ColumnHeader
+					settingsClick={() => toggleSettings(!isSettingsOpen)}
+					title={`Busca • ${column.query}`}
+					icon="search"
+				/>
+				<ColumnBody>
+					<SearchResults query={column.query} />
+				</ColumnBody>
+			</Column>
+			,
+			{isSettingsOpen && (
+				<Provider>
+					<div className="flex w-60 border-l p-2">
+						<Button
+							type="button"
+							variant="destructive"
+							onClick={() => {
+								removeColumn(index);
+							}}
+						>
+							Delete this column
+						</Button>
+					</div>
+				</Provider>
+			)}
+		</>
 	);
-	return [
-		<Column>
-			<ColumnHeader
-				settingsClick={() => toggleSettings(!isSettingsOpen)}
-				title={`Busca • ${column.query}`}
-				icon="search"
-			/>
-			<ColumnBody>
-				<SearchResults query={column.query} />
-			</ColumnBody>
-		</Column>,
-		isSettingsOpen && (
-			<Provider>
-				<div className="flex w-60 border-l border-divider p-2">
-					<Button
-						type="button"
-						variant="destructive"
-						onClick={() => {
-							toggleSettings(false);
-							removeColumn(index);
-						}}
-					>
-						Delete this column
-					</Button>
-				</div>
-			</Provider>
-		),
-	];
 }

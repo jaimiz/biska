@@ -5,6 +5,7 @@ import {
 } from "@/components/columns/views/columns";
 import { useAtomValue } from "jotai";
 import { PropsWithChildren, createContext, useContext } from "react";
+import { EmptyView } from "./EmptyView";
 
 export interface ColumnContextObject<
 	T extends BaseColumnConfig = BaseColumnConfig,
@@ -43,13 +44,13 @@ export const ColumnContextProvider = (
 export function DeckView() {
 	const columns = useAtomValue(columnsAtom);
 
+	if (columns.length === 0) {
+		return <EmptyView />;
+	}
+
 	return columns.map((column, index) => {
 		return (
-			<ColumnContextProvider
-				index={index}
-				column={column}
-				key={`column-${column.type}-${index}`}
-			>
+			<ColumnContextProvider index={index} column={column} key={column.id}>
 				<ColumnSelector columnConfig={column} />
 			</ColumnContextProvider>
 		);

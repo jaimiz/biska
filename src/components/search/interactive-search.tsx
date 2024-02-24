@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { buildSearchQuery } from "@/lib/search-parser";
-import { cn } from "@/lib/utils";
-import { atom, useAtomValue } from "jotai";
+import { cn, getCurrentTid } from "@/lib/utils";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { BetweenVerticalEnd } from "lucide-react";
 import { useState } from "react";
-import { isLoggedInAtom, requireAccountAtom } from "../user/sessionAtoms";
-import { useSearchPostsQuery } from "./queries";
 import { Column, ColumnBody, ColumnHeader } from "../columns/views/column";
 import { addColumn, createColumn } from "../columns/views/columns";
+import { isLoggedInAtom, requireAccountAtom } from "../user/sessionAtoms";
+import { useSearchPostsQuery } from "./queries";
 
 export function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
@@ -78,11 +78,36 @@ export const interactiveSearchAtom = atom(
 );
 
 export function InteractiveSearch() {
-	const isOpen = useAtomValue(interactiveSearchAtom);
+	const [isOpen, setIsOpen] = useAtom(interactiveSearchAtom);
 	const [searchTerms, setSearchTerms] = useState("");
 	const [query, setQuery] = useState("");
 	const [searchType] = useState<"all" | "me" | "user">("all");
 	const currentAccount = useAtomValue(requireAccountAtom);
+
+	const submitSearch = () => {
+		if (searchType === "me" && searchTerms !== "") {
+			setQuery(
+				buildSearchQuery({
+					terms: searchTerms,
+				}),
+			);
+			return;
+		}
+		if (searchType === "user" && searchTerms !== "") {
+			setQuery(
+				buildSearchQuery({
+					terms: searchTerms,
+				}),
+			);
+			return;
+		}
+		setQuery(buildSearchQuery({ terms: searchTerms }));
+	};
+
+	const clearSearch = () => {
+		setQuery("");
+		setSearchTerms("");
+	};
 
 	return (
 		<Column
@@ -100,29 +125,13 @@ export function InteractiveSearch() {
 						onChange={(e) => setSearchTerms(e.target.value)}
 						type="search"
 						placeholder="Buscar no Bluesky"
-					/>{" "}
-					<Button
-						type="submit"
-						onClick={() => {
-							if (searchType === "me" && searchTerms !== "") {
-								setQuery(
-									buildSearchQuery({
-										terms: searchTerms,
-									}),
-								);
-								return;
+						onKeyDown={(e) => {
+							if (e.code === "Enter") {
+								submitSearch();
 							}
-							if (searchType === "user" && searchTerms !== "") {
-								setQuery(
-									buildSearchQuery({
-										terms: searchTerms,
-									}),
-								);
-								return;
-							}
-							setQuery(buildSearchQuery({ terms: searchTerms }));
 						}}
-					>
+					/>{" "}
+					<Button type="submit" onClick={submitSearch}>
 						Buscar
 					</Button>
 				</div>
@@ -136,10 +145,13 @@ export function InteractiveSearch() {
 								onClick={() => {
 									addColumn(
 										createColumn.search({
+											id: getCurrentTid(),
 											account: currentAccount.did,
 											query,
 										}),
 									);
+									clearSearch();
+									setIsOpen(false);
 								}}
 							>
 								<span className="group-hover:not-sr-only">

@@ -29,6 +29,7 @@ export enum COLUMN_SIZE {
 }
 
 export interface BaseColumnConfig {
+	readonly id: string;
 	readonly type: ColumnType;
 	title: string;
 	size: COLUMN_SIZE;
@@ -51,10 +52,13 @@ export const createColumn = {
 	[COLUMN_TYPE_SEARCH]: ({
 		query,
 		account,
+		id,
 	}: {
+		id: string;
 		query: string;
 		account: Did;
 	}) => ({
+		id,
 		type: "search" as const,
 		title: "Busca",
 		size: COLUMN_SIZE.AUTO,
