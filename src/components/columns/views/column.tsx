@@ -4,74 +4,85 @@ import { cn } from "@/lib/utils";
 import { Preferences } from "@/state/schema";
 import { atomStore } from "@/state/state";
 import { ClassValue } from "clsx";
-import { CloudIcon, SearchIcon, Settings2Icon } from "lucide-react";
+import { CloudIcon, ScanSearch, SearchIcon, Settings2Icon } from "lucide-react";
 import { PropsWithChildren, createContext, useContext } from "react";
-import { interfacePreferencesAtom } from "../preferences/atoms";
+import { interfacePreferencesAtom } from "../../preferences/atoms";
 
-const ColumnConfigContext = createContext<{ size?: ColumnSizes }>({
-	size: undefined,
-});
+const ColumnSizeContext = createContext<ColumnSizes | null>(null);
 
-const useColumnConfig = () => {
-	const context = useContext(ColumnConfigContext);
+const useColumnSize = () => {
+	const context = useContext(ColumnSizeContext);
 	if (context === undefined) {
 		throw new Error("useColumnSize must be used within a Column");
+	}
+	if (context === null) {
+		return atomStore.get(interfacePreferencesAtom).columnSize;
 	}
 	return context;
 };
 const ColumnIcons = {
-	interactiveSearch: CloudIcon,
+	interactiveSearch: ScanSearch,
+	home: CloudIcon,
 	search: SearchIcon,
 };
 type ColumnIcons = keyof typeof ColumnIcons;
 function ColumnIcon({ icon }: { icon: ColumnIcons }) {
-	const Icon = ColumnIcons[icon];
+	const Icon = ColumnIcons[icon] ?? ColumnIcons.home;
 	return <Icon />;
 }
 
 type ColumnHeaderProps = {
 	title: string;
 	icon?: ColumnIcons;
+	settingsClick?: () => void;
 };
 export function ColumnHeader(props: ColumnHeaderProps) {
-	const { title, icon } = props;
-	const { size } = useColumnConfig();
+	const { title, icon, settingsClick } = props;
+	const columnSize = useColumnSize();
 
 	return (
 		<div
 			className={cn(
 				"flex justify-between items-center",
-				getColumnSpacing(size),
+				getColumnSpacing(columnSize),
 			)}
 		>
 			<h2 className="font-semibold text-sm flex items-center gap-2">
 				<ColumnIcon icon={icon ?? "search"} />
 				{title}
 			</h2>
-			<Button size="icon" variant="ghost">
-				<Settings2Icon />
-				<span className="sr-only">Settings</span>
-			</Button>
+			{settingsClick && (
+				<Button size="icon" variant="ghost" onClick={settingsClick}>
+					<Settings2Icon />
+					<span className="sr-only">Settings</span>
+				</Button>
+			)}
 		</div>
 	);
 }
 
-export function ColumnContent({
+export function ColumnBody({
 	children,
 	className,
 }: PropsWithChildren<{
 	className?: ClassValue;
 }>) {
-	const { size } = useColumnConfig();
 	return (
 		<div
 			className={cn(
 				className,
-				"flex shrink-0 flex-col bg-background w-full",
-				getColumnSpacing(size),
+				"flex min-h-0 grow relative flex-col bg-background w-full overflow-y-auto",
 			)}
 		>
 			{children}
+		</div>
+	);
+}
+
+export function ColumnAside(props: PropsWithChildren) {
+	return (
+		<div className={cn("flex justify-between items-center")}>
+			{props.children}
 		</div>
 	);
 }
@@ -103,14 +114,17 @@ export function Column({
 	size?: Preferences["interface"]["columnSize"];
 	className?: ClassValue;
 }>) {
-	const currentColumnSize = size;
 	return (
-		<div className="relative flex shrink-0 h-full min-h-0">
-			<ColumnConfigContext.Provider value={{ size: currentColumnSize }}>
-				<div className={cn(getColumnSpacing(size)[0], className)}>
-					{children}
-				</div>
-			</ColumnConfigContext.Provider>
-		</div>
+		<ColumnSizeContext.Provider value={size ?? null}>
+			<div
+				className={cn(
+					"flex shrink-0 flex-col",
+					getColumnSpacing(size)[0],
+					className,
+				)}
+			>
+				{children}
+			</div>
+		</ColumnSizeContext.Provider>
 	);
 }

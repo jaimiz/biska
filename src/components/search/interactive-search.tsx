@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils";
 import { atom, useAtomValue } from "jotai";
 import { BetweenVerticalEnd } from "lucide-react";
 import { useState } from "react";
-import { Column, ColumnContent, ColumnHeader } from "../panes/column";
-import { addColumn, createColumn } from "../panes/columns";
 import { isLoggedInAtom, requireAccountAtom } from "../user/sessionAtoms";
 import { useSearchPostsQuery } from "./queries";
+import { Column, ColumnBody, ColumnHeader } from "../columns/views/column";
+import { addColumn, createColumn } from "../columns/views/columns";
 
-function SearchResults({ query }: { query: string }) {
+export function SearchResults({ query }: { query: string }) {
 	const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetching } =
 		useSearchPostsQuery({ query });
 	if (isLoading) {
@@ -91,9 +91,9 @@ export function InteractiveSearch() {
 				"w-120": isOpen,
 			})}
 		>
-			<ColumnHeader title="Buscar" icon="interactiveSearch" />
-			<ColumnContent className="gap-y-4">
-				<div className="flex w-full justify-center items-center gap-x-4">
+			<ColumnHeader title="Buscar" icon="home" />
+			<ColumnBody className="gap-y-4">
+				<div className="p-4 flex w-full justify-center items-center gap-x-4">
 					<input type="hidden" name="q" value={query} />
 					<Input
 						value={searchTerms}
@@ -129,7 +129,7 @@ export function InteractiveSearch() {
 
 				{query ? (
 					<>
-						<div className="text-right max-w-full">
+						<div className="text-right max-w-full px-4">
 							<Button
 								className="inline-flex items-center gap-1"
 								title="Criar coluna com busca"
@@ -151,7 +151,7 @@ export function InteractiveSearch() {
 						<SearchResults query={query} />
 					</>
 				) : null}
-			</ColumnContent>
+			</ColumnBody>
 		</Column>
 	);
 }

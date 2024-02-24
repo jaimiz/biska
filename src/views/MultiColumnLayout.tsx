@@ -173,11 +173,11 @@ export function MultiColumnView() {
 			<DashboardSidebar />
 			<div
 				className={cn(
-					"flex grow bg-background-dark transition-transform divide-x",
+					"flex grow bg-background-dark transition-transform divide-x overflow-x-auto",
 				)}
 			>
 				{isLoggedIn && <InteractiveSearch />}
-				<div className="h-screen overflow-y-auto flex grow gap-1 overflow-x-auto">
+				<div className="h-screen flex grow divide-x overflow-x-auto">
 					{isLoggedIn ? <DeckView /> : <EmptyView />}
 				</div>
 			</div>
