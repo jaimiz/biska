@@ -10,6 +10,8 @@ import { queryClient } from "./lib/react-query";
 import { AppSchema } from "./state/schema";
 import { BISKA_STORAGE_KEY, appStateAtom } from "./state/state";
 import { MultiColumnView } from "./views/MultiColumnLayout";
+import { Centered } from "./components/layouts/Centered";
+import { Spinner } from "./components/ui/spinner";
 
 export function App() {
 	const [, setAppstate] = useAtom(appStateAtom);
@@ -43,7 +45,15 @@ export function App() {
 
 export default function AppWrapper() {
 	return (
-		<Suspense>
+		<Suspense
+			fallback={
+				<Centered>
+					<div className="text-3xl font-bold text-center">
+						<Spinner />
+					</div>
+				</Centered>
+			}
+		>
 			<App />
 		</Suspense>
 	);
