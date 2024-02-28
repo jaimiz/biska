@@ -1,3 +1,4 @@
+import { Drawer } from "@/components/columns/drawer";
 import {
 	effectResetPrefsPaneOnLogout,
 	prefsPaneIsOpenAtom,
@@ -19,6 +20,7 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import { ButtonHTMLAttributes, forwardRef, useCallback } from "react";
+import { Outlet, useMatch } from "react-router-dom";
 import { DeckView } from "./DeckView";
 import { LoginScreen } from "./login-screen";
 
@@ -165,6 +167,7 @@ function DashboardSidebar() {
 
 export function MultiColumnView() {
 	const isLoggedIn = useAtomValue(isLoggedInAtom);
+	const isRoot = useMatch("/");
 	return (
 		<div className="flex h-screen w-screen overflow-hidden divide-x">
 			<DashboardSidebar />
@@ -178,6 +181,11 @@ export function MultiColumnView() {
 					{isLoggedIn ? <DeckView /> : <LoginScreen />}
 				</div>
 			</div>
+			{isLoggedIn && (
+				<Drawer open={!isRoot}>
+					<Outlet />
+				</Drawer>
+			)}
 		</div>
 	);
 }

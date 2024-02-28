@@ -1,3 +1,5 @@
+import { useCurrentAgent } from "@/lib/agent";
+import { STALE } from "@/lib/queries";
 import { isInvalidHandle } from "@/lib/strings/handle";
 import {
 	AppBskyActorDefs,
@@ -5,9 +7,7 @@ import {
 } from "@atproto/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { STALE } from "@/lib/queries";
 import { useMyFollowsQuery } from "./follows-queries";
-import { getAgent } from "@/lib/agent";
 
 export const RQKEY = (prefix: string) => ["actor-autocomplete", prefix];
 
@@ -19,6 +19,7 @@ const autocompleteKeys = {
 
 export function useActorAutocompleteQuery(prefix: string) {
 	const { data: follows, isFetching } = useMyFollowsQuery();
+	const agent = useCurrentAgent();
 
 	return useQuery<AppBskyActorDefs.ProfileViewBasic[]>({
 		staleTime: STALE.MINUTES.ONE,
@@ -26,7 +27,7 @@ export function useActorAutocompleteQuery(prefix: string) {
 		async queryFn() {
 			// TODO: Figure out how to pass the did to getAgent here
 			const res = prefix
-				? await getAgent().searchActorsTypeahead({
+				? await agent.searchActorsTypeahead({
 						term: prefix,
 						limit: 8,
 				  })
@@ -47,6 +48,7 @@ export type ActorAutocompleteFn = ReturnType<typeof useActorAutocompleteFn>;
 export function useActorAutocompleteFn() {
 	const queryClient = useQueryClient();
 	const { data: follows } = useMyFollowsQuery();
+	const agent = useCurrentAgent();
 
 	return React.useCallback(
 		async ({ query, limit = 8 }: { query: string; limit?: number }) => {
@@ -58,7 +60,7 @@ export function useActorAutocompleteFn() {
 						staleTime: STALE.MINUTES.ONE,
 						queryKey: autocompleteKeys.prefix(query),
 						queryFn: () =>
-							getAgent().searchActorsTypeahead({
+							agent.searchActorsTypeahead({
 								term: query,
 								limit,
 							}),
@@ -72,7 +74,7 @@ export function useActorAutocompleteFn() {
 
 			return computeSuggestions(query, follows, res?.data.actors);
 		},
-		[follows, queryClient],
+		[follows, queryClient, agent],
 	);
 }
 

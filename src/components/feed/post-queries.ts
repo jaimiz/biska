@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { useCurrentAgent } from "@/lib/agent";
+import { postsCacheAtom, updatePostAtom } from "@/lib/cache";
 import { AppBskyFeedDefs } from "@atproto/api";
 import { useAtomValue } from "jotai";
-import { postsCacheAtom, updatePostAtom } from "@/lib/cache";
 import { SkylineSliceItem } from "../user/profile-queries";
-import { getAgent } from "@/lib/agent";
 
 export const postKeys = {
 	all: ["posts"] as const,
@@ -28,7 +28,7 @@ export const usePost = (uri: string) => {
 };
 
 export const usePostQuery = ({ uri }: { uri: string }) => {
-	const agent = getAgent();
+	const agent = useCurrentAgent();
 
 	return useQuery({
 		queryKey: postKeys.detail({ uri }),
@@ -47,12 +47,13 @@ export const usePostQuery = ({ uri }: { uri: string }) => {
 
 export function usePostLikeMutation(post: AppBskyFeedDefs.PostView) {
 	const queryClient = useQueryClient();
+	const agent = useCurrentAgent();
 	return useMutation<
 		{ uri: string }, // responds with the uri of the like
 		Error,
 		SkylineSliceItem["post"]
 	>({
-		mutationFn: (post) => getAgent().like(post.uri, post.cid),
+		mutationFn: (post) => agent.like(post.uri, post.cid),
 		onSuccess: (data) => {
 			queryClient.setQueryData<Partial<AppBskyFeedDefs.PostView>>(
 				postKeys.detail({ uri: post.uri }),
@@ -75,9 +76,10 @@ export function usePostLikeMutation(post: AppBskyFeedDefs.PostView) {
 
 export function usePostUnlikeMutation(post: AppBskyFeedDefs.PostView) {
 	const queryClient = useQueryClient();
+	const agent = useCurrentAgent();
 	return useMutation<unknown, Error, string>({
 		mutationFn: async (likeUri) => {
-			await getAgent().deleteLike(likeUri);
+			await agent.deleteLike(likeUri);
 		},
 		onSuccess: () => {
 			queryClient.setQueryData<Partial<AppBskyFeedDefs.PostView>>(
@@ -101,12 +103,13 @@ export function usePostUnlikeMutation(post: AppBskyFeedDefs.PostView) {
 
 export function usePostRepostMutation(post: AppBskyFeedDefs.PostView) {
 	const queryClient = useQueryClient();
+	const agent = useCurrentAgent();
 	return useMutation<
 		{ uri: string }, // responds with the uri of the repost
 		Error,
 		SkylineSliceItem["post"]
 	>({
-		mutationFn: (post) => getAgent().repost(post.uri, post.cid),
+		mutationFn: (post) => agent.repost(post.uri, post.cid),
 		onSuccess: (data) => {
 			queryClient.setQueryData<Partial<AppBskyFeedDefs.PostView>>(
 				postKeys.detail({ uri: post.uri }),
@@ -129,9 +132,10 @@ export function usePostRepostMutation(post: AppBskyFeedDefs.PostView) {
 
 export function usePostUnrepostMutation(post: AppBskyFeedDefs.PostView) {
 	const queryClient = useQueryClient();
+	const agent = useCurrentAgent();
 	return useMutation<unknown, Error, string>({
 		mutationFn: async (repostUri) => {
-			await getAgent().deleteRepost(repostUri);
+			await agent.deleteRepost(repostUri);
 		},
 		onSuccess: () => {
 			queryClient.setQueryData<Partial<AppBskyFeedDefs.PostView>>(
@@ -153,9 +157,10 @@ export function usePostUnrepostMutation(post: AppBskyFeedDefs.PostView) {
 
 export function usePostDeleteMutation(post: AppBskyFeedDefs.PostView) {
 	const queryClient = useQueryClient();
+	const agent = useCurrentAgent();
 	return useMutation<unknown, Error, { uri: string }>({
 		mutationFn: async ({ uri }) => {
-			await getAgent().deletePost(uri);
+			await agent.deletePost(uri);
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({

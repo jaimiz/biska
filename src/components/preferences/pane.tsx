@@ -1,17 +1,12 @@
 import { SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Preferences } from "@/state/schema";
-import { BlueskyLogin } from "@/views/login-bluesky";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { Trash } from "lucide-react";
-import { accountsAtom, removeAccountAtom } from "../user/sessionAtoms";
+import { useAtom, useSetAtom } from "jotai";
 import { interfacePreferencesAtom, preferencesAtom } from "./atoms";
 
 export function PreferencesDrawer() {
 	const [preferences, setPreferences] = useAtom(preferencesAtom);
 	const setInterfacePreferences = useSetAtom(interfacePreferencesAtom);
-	const accounts = useAtomValue(accountsAtom);
-	const removeAccount = useSetAtom(removeAccountAtom);
 	return (
 		<SheetContent
 			side={"right"}
@@ -97,29 +92,6 @@ export function PreferencesDrawer() {
 							</TabsTrigger>
 						</TabsList>
 					</Tabs>
-				</div>
-				<div className="flex flex-col gap-2 w-full">
-					<div
-						role="heading"
-						aria-level={3}
-						className="text-md text-foreground font-semibold"
-					>
-						Adicionar conta
-					</div>
-					<BlueskyLogin />
-					{accounts.map((account) => (
-						<div key={`account-${account.did}`}>
-							{account.handle}
-							<button
-								type="button"
-								onClick={() => {
-									removeAccount(account);
-								}}
-							>
-								<Trash />
-							</button>
-						</div>
-					))}
 				</div>
 			</div>
 		</SheetContent>

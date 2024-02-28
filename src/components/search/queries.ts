@@ -1,3 +1,4 @@
+import { useCurrentAgent } from "@/lib/agent";
 import { AppBskyFeedSearchPosts } from "@atproto/api";
 import {
 	InfiniteData,
@@ -5,9 +6,9 @@ import {
 	useInfiniteQuery,
 } from "@tanstack/react-query";
 import { postKeys } from "../feed/post-queries";
-import { getAgent } from "@/lib/agent";
 
 export function useSearchPostsQuery({ query }: { query: string }) {
+	const agent = useCurrentAgent();
 	return useInfiniteQuery<
 		AppBskyFeedSearchPosts.OutputSchema,
 		Error,
@@ -17,7 +18,7 @@ export function useSearchPostsQuery({ query }: { query: string }) {
 	>({
 		queryKey: postKeys.search(query),
 		queryFn: async ({ pageParam }) => {
-			const res = await getAgent().app.bsky.feed.searchPosts({
+			const res = await agent.app.bsky.feed.searchPosts({
 				q: query,
 				limit: 25,
 				cursor: pageParam,

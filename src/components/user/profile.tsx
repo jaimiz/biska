@@ -4,8 +4,10 @@ import { cn } from "@/lib/utils";
 import { Did } from "@/state/schema";
 import { RichText as RichTextAPI } from "@atproto/api";
 import { ProfileViewDetailed } from "@atproto/api/dist/client/types/app/bsky/actor/defs";
+import { useAtomValue } from "jotai";
 import {
 	Ban,
+	Circle,
 	MessageSquareX,
 	UserRound,
 	UserRoundCheck,
@@ -29,12 +31,22 @@ import {
 	useProfilePosts,
 	useProfileQuery,
 } from "./profile-queries";
+import { requireAccountAtom } from "./sessionAtoms";
 
 export function Profile() {
 	const { handleOrDid } = useParams();
-	const { isLoading, data: profile } = useProfileQuery({
-		did: handleOrDid as Did,
-	});
+	let isLoading = true;
+	let profile = null;
+	try {
+		const { isLoading: isQueryLoading, data } = useProfileQuery({
+			did: handleOrDid as Did,
+		});
+		isLoading = isQueryLoading;
+		profile = data;
+	} catch (e) {
+		isLoading = false;
+		console.error(e);
+	}
 
 	if (isLoading) {
 		return "Carregando…";
@@ -48,45 +60,84 @@ export function Profile() {
 
 function ProfileFollowBadge({ profile }: { profile: ProfileViewDetailed }) {
 	let message = null;
+	let action = null;
+	let actionIcon = null;
 	let icon = null;
 	const { blockedBy, blocking, followedBy, following } = profile.viewer ?? {};
-	console.log("labels", profile);
-	if (
-		profile.labels?.some((label) => {
-			return label.src === profile.did;
-		}) &&
-		!profile.viewer?.following &&
-		!profile.viewer?.followedBy
-	) {
-		message = "Você!";
-		icon = <UserRound />;
-	} else if (blocking && blockedBy) {
-		message = "Mutualmente Bloqueados";
-		icon = <Ban />;
-	} else if (blocking) {
-		message = "Você bloqueou";
-		icon = <UserRoundMinus />;
-	} else if (blockedBy) {
-		message = "Você está bloqueado";
-		icon = <UserRoundX />;
-	} else if (following && followedBy) {
-		message = "Mutuals";
-		icon = <UsersRound />;
-	} else if (following) {
-		message = "Você segue";
-		icon = <UserRoundCheck />;
-	} else if (followedBy) {
-		message = "Segue você";
-		icon = <UserRoundPlus />;
+	console.log({ blockedBy, blocking, following, followedBy });
+	try {
+		const viewer = useAtomValue(requireAccountAtom);
+		if (profile.did === viewer.did) {
+			message = "Você!";
+			icon = <UserRound />;
+		} else if (blocking && blockedBy) {
+			message = "Mutualmente Bloqueados";
+			icon = <Ban />;
+			action = "Desbloquear";
+			actionIcon = <Circle />;
+		} else if (blocking) {
+			message = "Você bloqueou";
+			icon = <UserRoundMinus />;
+			action = "Desbloquear";
+			actionIcon = <Circle />;
+		} else if (blockedBy) {
+			message = "Você está bloqueado";
+			icon = <UserRoundX />;
+			action = "Bloquear";
+			actionIcon = <Ban />;
+		} else if (following && followedBy) {
+			message = "Mutuals";
+			icon = <UsersRound />;
+			action = "Deixar de seguir";
+			actionIcon = <UserRoundMinus />;
+		} else if (following) {
+			message = "Você segue";
+			icon = <UserRoundCheck />;
+			action = "Deixar de seguir";
+			actionIcon = <UserRoundMinus />;
+		} else if (followedBy) {
+			message = "Segue você";
+			icon = <UserRoundPlus />;
+			action = "Seguir";
+			actionIcon = <UserRoundCheck />;
+		}
+		if (message && icon) {
+			const hasAction = action && actionIcon;
+			const buttonClasses =
+				"inline-flex gap-1 items-center text-center justify-center grow";
+			console.log({ hasAction, buttonClasses });
+			return (
+				<Badge className="group/follow w-36 inline-flex items-center justify-center">
+					<span className="basis-6">
+						<span className={cn({ "group-hover/follow:hidden": hasAction })}>
+							{icon}
+						</span>
+						<span
+							className={cn("hidden", {
+								"group-hover/follow:inline": hasAction,
+							})}
+						>
+							{actionIcon}
+						</span>
+					</span>
+					<span className="grow text-center">
+						<span className={cn({ "group-hover/follow:hidden": hasAction })}>
+							{message}
+						</span>
+						<span
+							className={cn("hidden", {
+								"group-hover/follow:inline": hasAction,
+							})}
+						>
+							{action}
+						</span>
+					</span>
+				</Badge>
+			);
+		}
+	} catch {
+		return null;
 	}
-	if (message && icon) {
-		return (
-			<Badge className="inline-flex gap-1 itemx-center">
-				{icon} {message}
-			</Badge>
-		);
-	}
-	return null;
 }
 
 function modIsBlocked(viewer: ProfileViewDetailed["viewer"]) {

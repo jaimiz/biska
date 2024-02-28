@@ -1,16 +1,15 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
-
-import { Toaster } from "./components/ui/sonner";
-
-import { Suspense, useEffect } from "react";
-import { TimeTickProvider } from "./lib/clock";
-import { queryClient } from "./lib/react-query";
-import { MultiColumnView } from "./views/MultiColumnLayout";
-import { BISKA_STORAGE_KEY, appStateAtom } from "./state/state";
 import { useAtom } from "jotai";
 import localforage from "localforage";
+import { Suspense, useEffect } from "react";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Toaster } from "./components/ui/sonner";
+import { bskyApi } from "./lib/agent";
+import { TimeTickProvider } from "./lib/clock";
+import { queryClient } from "./lib/react-query";
 import { AppSchema } from "./state/schema";
+import { BISKA_STORAGE_KEY, appStateAtom } from "./state/state";
+import { MultiColumnView } from "./views/MultiColumnLayout";
 
 export function App() {
 	const [, setAppstate] = useAtom(appStateAtom);
@@ -18,8 +17,10 @@ export function App() {
 	useEffect(() => {
 		(async () => {
 			const rawData = await localforage.getItem<unknown>(BISKA_STORAGE_KEY);
-			if (AppSchema.safeParse(rawData).success) {
-				setAppstate(rawData as AppSchema);
+			const maybeAppstate = AppSchema.safeParse(rawData);
+			if (maybeAppstate.success) {
+				setAppstate(maybeAppstate.data);
+				bskyApi.resumeSession(maybeAppstate.data.session.currentAccount);
 			}
 		})();
 	}, [setAppstate]);

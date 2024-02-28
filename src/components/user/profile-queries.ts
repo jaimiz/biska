@@ -1,4 +1,4 @@
-import { getAgent } from "@/lib/agent";
+import { useCurrentAgent } from "@/lib/agent";
 import { isBlockedByError, isBlockingError } from "@/lib/errors";
 import { Did } from "@/state/schema";
 import { AppBskyFeedDefs, AppBskyFeedGetAuthorFeed } from "@atproto/api";
@@ -19,10 +19,14 @@ export const profileKeys = {
 };
 
 export function useProfileQuery({ did }: { did: Did }) {
+	const agent = useCurrentAgent();
 	return useQuery({
 		queryKey: profileKeys.detail(did),
 		queryFn: async () => {
-			const res = await getAgent(did).getProfile({ actor: did ?? "" });
+			const res = await agent.getProfile({
+				actor: did ?? "",
+			});
+			console.log("profile", { res });
 			return res.data as ProfileViewDetailed;
 		},
 		enabled: !!did,
@@ -40,6 +44,7 @@ export const useProfilePosts = (
 	actor: string,
 	filter: AuthorFeedFilters = "posts_no_replies",
 ) => {
+	const agent = useCurrentAgent();
 	const profilePostsQuery = useInfiniteQuery<{
 		cursor?: string;
 		feed: AppBskyFeedDefs.FeedViewPost[];
@@ -49,7 +54,7 @@ export const useProfilePosts = (
 		initialPageParam: undefined,
 		queryKey: profileKeys.actorFeed(actor, filter),
 		queryFn: async ({ pageParam }) => {
-			const res = await getAgent().getAuthorFeed({
+			const res = await agent.getAuthorFeed({
 				actor,
 				filter,
 				cursor: (pageParam as string) ?? undefined,

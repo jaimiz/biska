@@ -1,9 +1,12 @@
-import { upsertAccountAtom } from "@/components/user/sessionAtoms";
+import {
+	requireAccountAtom,
+	upsertAccountAtom,
+} from "@/components/user/sessionAtoms";
 import type { Did, PersistedAccount, Session } from "@/state/schema";
 import { appStateAtom, atomStore } from "@/state/state";
 import { dashboardSidebarExpanded } from "@/views/MultiColumnLayout";
 import { AtpPersistSessionHandler, BskyAgent } from "@atproto/api";
-import { atom } from "jotai";
+import { atom, useAtomValue } from "jotai";
 import { atomFamily } from "jotai/utils";
 
 const agentsAtom = atom<Record<Did, BskyAgent>>({});
@@ -26,10 +29,16 @@ export const PUBLIC_BSKY_AGENT = new BskyAgent({
 	service: "https://api.bsky.app",
 });
 
-let __currentAgent: BskyAgent = PUBLIC_BSKY_AGENT;
+export function getAgent(did: Did) {
+	const agentAtom = agentsFamily(did);
+	const agent = atomStore.get(agentAtom);
+	console.log(agent);
+	return agent;
+}
 
-export function getAgent(_?: Did) {
-	return __currentAgent;
+export function useCurrentAgent() {
+	const currentAccount = useAtomValue(requireAccountAtom);
+	return getAgent(currentAccount.did);
 }
 
 export type ApiMethods = {
@@ -123,7 +132,7 @@ const login: ApiMethods["login"] = async ({
 		accessJwt: agent.session.accessJwt,
 	};
 
-	__currentAgent = agent;
+	atomStore.set(agentsFamily(account.did), agent);
 	atomStore.set(upsertAccountAtom, account);
 };
 
@@ -185,7 +194,7 @@ const initSession = async (account: PersistedAccount) => {
 		accessJwt: agent.session.accessJwt,
 	};
 
-	__currentAgent = agent;
+	atomStore.set(agentsFamily(account.did), agent);
 	atomStore.set(upsertAccountAtom, freshAccount);
 };
 
@@ -204,7 +213,6 @@ const resumeSession: ApiMethods["resumeSession"] = async (account) => {
 };
 
 const clearCurrentAccount = () => {
-	__currentAgent = PUBLIC_BSKY_AGENT;
 	setSessionAndPersist((s) => ({
 		...s,
 		currentAccount: undefined,
