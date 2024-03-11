@@ -47,10 +47,6 @@ export const removeAccountAtom = atom(
 	null,
 	(get, set, account: PersistedAccount) => {
 		const accounts = get(accountsAtom);
-		console.log({
-			accounts,
-			filtered: accounts.filter((a) => a.did !== account.did),
-		});
 		const next = accounts.filter((a) => a.did !== account.did);
 		set(accountsAtom, next);
 		// if no more accounts, also clear the current account (and logout)

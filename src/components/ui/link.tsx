@@ -20,12 +20,18 @@ export function BskyAppLink(props: LinkProps) {
 		? props.to
 		: `https://bsky.app${props.to}`;
 
-	const { children, ...rest } = props;
+	const { children, className, ...rest } = props;
 	return (
-		<NavLink {...rest} to={bskyLink} target="_blank">
+		<a
+			className={cn("text-primary", className)}
+			{...rest}
+			href={bskyLink.toString()}
+			target="_blank"
+			rel="noreferrer"
+		>
 			{children}
 			<ExternalLinkIcon className="w-3 h-3 inline-block" />
-		</NavLink>
+		</a>
 	);
 }
 

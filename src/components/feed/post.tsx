@@ -398,7 +398,6 @@ function SpotifyExternalEmbed({ embed }: EmbedViewProps) {
 	const [oembed, setOembed] = useState(<StaticSpotifyEmbed embed={embed} />);
 	useEffect(() => {
 		async function fetchOembedData() {
-			console.log(`fetching ${oEmbedUrl}`);
 			const response = await fetch(oEmbedUrl);
 			if (response.status === 200) {
 				const data = await response.json();

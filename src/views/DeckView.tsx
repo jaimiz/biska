@@ -1,11 +1,16 @@
+import { Column } from "@/components/columns/views/column";
 import {
 	BaseColumnConfig,
 	ColumnSelector,
+	addColumn,
 	columnsAtom,
+	createColumn,
 } from "@/components/columns/views/columns";
+import { Button } from "@/components/ui/button";
+import { requireAccountAtom } from "@/components/user/sessionAtoms";
+import { getCurrentTid } from "@/lib/utils";
 import { useAtomValue } from "jotai";
 import { PropsWithChildren, createContext, useContext } from "react";
-import { EmptyView } from "./EmptyView";
 
 export interface ColumnContextObject<
 	T extends BaseColumnConfig = BaseColumnConfig,
@@ -44,15 +49,41 @@ export const ColumnContextProvider = (
 export function DeckView() {
 	const columns = useAtomValue(columnsAtom);
 
-	if (columns.length === 0) {
-		return <EmptyView />;
-	}
-
-	return columns.map((column, index) => {
-		return (
-			<ColumnContextProvider index={index} column={column} key={column.id}>
-				<ColumnSelector columnConfig={column} />
-			</ColumnContextProvider>
-		);
-	});
+	const currentAccount = useAtomValue(requireAccountAtom);
+	const DeckColumns = () => (
+		<>
+			{" "}
+			{columns.map((column, index) => {
+				return (
+					<ColumnContextProvider index={index} column={column} key={column.id}>
+						<ColumnSelector columnConfig={column} />
+					</ColumnContextProvider>
+				);
+			})}
+		</>
+	);
+	return (
+		<>
+			<DeckColumns />
+			<Column>
+				<div className="flex m-auto">
+					<Button
+						type="button"
+						onClick={() => {
+							// TODO: Implement new column modal later, for now, let's add a
+							// home column
+							addColumn(
+								createColumn.home({
+									id: getCurrentTid(),
+									account: currentAccount.did,
+								}),
+							);
+						}}
+					>
+						Adicionar Coluna
+					</Button>
+				</div>
+			</Column>
+		</>
+	);
 }

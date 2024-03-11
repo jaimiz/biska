@@ -1,6 +1,8 @@
 import { Drawer } from "@/components/columns/drawer";
+import { Centered } from "@/components/layouts/Centered";
 import {
 	effectResetPrefsPaneOnLogout,
+	preferencesAtom,
 	prefsPaneIsOpenAtom,
 } from "@/components/preferences/atoms";
 import { PreferencesDrawer } from "@/components/preferences/pane";
@@ -20,9 +22,15 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import { ButtonHTMLAttributes, forwardRef, useCallback } from "react";
-import { Outlet, useMatch } from "react-router-dom";
+import {
+	Outlet,
+	createBrowserRouter,
+	useMatch,
+	RouterProvider,
+} from "react-router-dom";
 import { DeckView } from "./DeckView";
 import { LoginScreen } from "./login-screen";
+import { ProfileSheetView } from "@/components/user/profile";
 
 export const dashboardSidebarExpanded = atom(false);
 function DashboardSidebar() {
@@ -165,8 +173,7 @@ function DashboardSidebar() {
 	);
 }
 
-export function MultiColumnView() {
-	const isLoggedIn = useAtomValue(isLoggedInAtom);
+function MultiViewRoute() {
 	const isRoot = useMatch("/");
 	return (
 		<div className="flex h-screen w-screen overflow-hidden divide-x">
@@ -176,16 +183,52 @@ export function MultiColumnView() {
 					"flex grow bg-background-dark transition-transform divide-x overflow-x-auto",
 				)}
 			>
-				{isLoggedIn && <InteractiveSearch />}
+				<InteractiveSearch />
 				<div className="h-screen flex grow divide-x overflow-x-auto border-r">
-					{isLoggedIn ? <DeckView /> : <LoginScreen />}
+					<DeckView />
 				</div>
 			</div>
-			{isLoggedIn && (
-				<Drawer open={!isRoot}>
-					<Outlet />
-				</Drawer>
-			)}
+			<Drawer open={!isRoot}>
+				<Outlet />
+			</Drawer>
 		</div>
 	);
+}
+
+function MultiView() {
+	const router = createBrowserRouter([
+		{
+			path: "/",
+			element: <MultiViewRoute />,
+			errorElement: <MultiViewRoute />,
+			children: [
+				{
+					path: "/profile/:handleOrDid",
+					element: <ProfileSheetView />,
+				},
+			],
+		},
+	]);
+	return <RouterProvider router={router} />;
+}
+
+function SingleView() {
+	return <h1>Single</h1>;
+}
+
+export function ViewOptionSelector() {
+	const { viewOption } = useAtomValue(preferencesAtom).interface;
+	const isLoggedIn = useAtomValue(isLoggedInAtom);
+
+	const ViewComponent = viewOption === "column" ? MultiView : SingleView;
+
+	if (!isLoggedIn) {
+		return (
+			<Centered>
+				<LoginScreen />
+			</Centered>
+		);
+	}
+
+	return <ViewComponent />;
 }

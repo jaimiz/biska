@@ -2,16 +2,15 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import localforage from "localforage";
 import { Suspense, useEffect } from "react";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Centered } from "./components/layouts/Centered";
 import { Toaster } from "./components/ui/sonner";
+import { Spinner } from "./components/ui/spinner";
 import { bskyApi } from "./lib/agent";
 import { TimeTickProvider } from "./lib/clock";
 import { queryClient } from "./lib/react-query";
 import { AppSchema } from "./state/schema";
 import { BISKA_STORAGE_KEY, appStateAtom } from "./state/state";
-import { MultiColumnView } from "./views/MultiColumnLayout";
-import { Centered } from "./components/layouts/Centered";
-import { Spinner } from "./components/ui/spinner";
+import { ViewOptionSelector } from "./views/MultiColumnLayout";
 
 export function App() {
 	const [, setAppstate] = useAtom(appStateAtom);
@@ -26,17 +25,10 @@ export function App() {
 			}
 		})();
 	}, [setAppstate]);
-	const router = createBrowserRouter([
-		{
-			path: "/",
-			element: <MultiColumnView />,
-			errorElement: <MultiColumnView />,
-		},
-	]);
 	return (
 		<QueryClientProvider client={queryClient}>
 			<TimeTickProvider>
-				<RouterProvider router={router} />
+				<ViewOptionSelector />
 			</TimeTickProvider>
 			<Toaster />
 		</QueryClientProvider>

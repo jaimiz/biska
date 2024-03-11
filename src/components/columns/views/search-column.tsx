@@ -1,7 +1,6 @@
 import { SearchResults } from "@/components/search/interactive-search";
 import { Button } from "@/components/ui/button";
 import { useColumnContext } from "@/views/DeckView";
-import { Provider } from "jotai";
 import { useState } from "react";
 import { Column, ColumnBody, ColumnHeader } from "./column";
 import { SearchColumnConfig, removeColumn } from "./columns";
@@ -21,22 +20,23 @@ export function SearchColumn() {
 					<SearchResults query={column.query} />
 				</ColumnBody>
 			</Column>
-			,
-			{isSettingsOpen && (
-				<Provider>
-					<div className="flex w-60 border-l p-2">
-						<Button
-							type="button"
-							variant="destructive"
-							onClick={() => {
-								removeColumn(index);
-							}}
-						>
-							Delete this column
-						</Button>
-					</div>
-				</Provider>
-			)}
+			,{isSettingsOpen && <GenericSettings index={index} />}
 		</>
+	);
+}
+
+export function GenericSettings(props: { index: number }) {
+	return (
+		<div className="flex w-60 border-l p-2">
+			<Button
+				type="button"
+				variant="destructive"
+				onClick={() => {
+					removeColumn(props.index);
+				}}
+			>
+				Delete this column
+			</Button>
+		</div>
 	);
 }

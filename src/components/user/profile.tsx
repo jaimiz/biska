@@ -33,8 +33,9 @@ import {
 } from "./profile-queries";
 import { requireAccountAtom } from "./sessionAtoms";
 
-export function Profile() {
+export function ProfileSheetView() {
 	const { handleOrDid } = useParams();
+	console.log({ handleOrDid });
 	let isLoading = true;
 	let profile = null;
 	try {
@@ -64,7 +65,6 @@ function ProfileFollowBadge({ profile }: { profile: ProfileViewDetailed }) {
 	let actionIcon = null;
 	let icon = null;
 	const { blockedBy, blocking, followedBy, following } = profile.viewer ?? {};
-	console.log({ blockedBy, blocking, following, followedBy });
 	try {
 		const viewer = useAtomValue(requireAccountAtom);
 		if (profile.did === viewer.did) {
@@ -103,9 +103,7 @@ function ProfileFollowBadge({ profile }: { profile: ProfileViewDetailed }) {
 		}
 		if (message && icon) {
 			const hasAction = action && actionIcon;
-			const buttonClasses =
-				"inline-flex gap-1 items-center text-center justify-center grow";
-			console.log({ hasAction, buttonClasses });
+
 			return (
 				<Badge className="group/follow w-36 inline-flex items-center justify-center">
 					<span className="basis-6">

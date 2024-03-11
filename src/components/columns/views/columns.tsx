@@ -1,8 +1,9 @@
-import { Did } from "@/state/schema";
-import { atomStore } from "@/state/state";
+import { SetRequired } from "type-fest";
 import { atomWithStorage } from "jotai/utils";
 import { SearchColumn } from "./search-column";
 import { HomeColumn } from "./home-column";
+import { Did } from "@/state/schema";
+import { atomStore } from "@/state/state";
 
 export const COLUMN_TYPE_HOME = "home";
 export const COLUMN_TYPE_NOTIFICATIONS = "notifications";
@@ -38,10 +39,12 @@ export interface BaseColumnConfig {
 export interface SearchColumnConfig extends BaseColumnConfig {
 	readonly type: typeof COLUMN_TYPE_SEARCH;
 	query: string;
+	account: Did;
 }
 
 export interface HomeColumnConfig extends BaseColumnConfig {
 	readonly type: typeof COLUMN_TYPE_HOME;
+	account: Did;
 }
 
 type ColumnConfig = SearchColumnConfig | HomeColumnConfig;
@@ -49,22 +52,27 @@ type ColumnConfig = SearchColumnConfig | HomeColumnConfig;
 export const columnsAtom = atomWithStorage<ColumnConfig[]>("columns", []);
 
 export const createColumn = {
-	[COLUMN_TYPE_SEARCH]: ({
-		query,
-		account,
-		id,
-	}: {
-		id: string;
-		query: string;
-		account: Did;
-	}) => ({
-		id,
-		type: "search" as const,
-		title: "Busca",
-		size: COLUMN_SIZE.AUTO,
-		query,
-		account,
-	}),
+	[COLUMN_TYPE_SEARCH]: (
+		config: SetRequired<
+			Partial<SearchColumnConfig>,
+			"id" | "account" | "query"
+		>,
+	) =>
+		({
+			type: COLUMN_TYPE_SEARCH,
+			title: "Busca",
+			size: COLUMN_SIZE.AUTO,
+			...config,
+		}) as SearchColumnConfig,
+	[COLUMN_TYPE_HOME]: (
+		config: SetRequired<Partial<HomeColumnConfig>, "account" | "id">,
+	) =>
+		({
+			type: COLUMN_TYPE_HOME,
+			title: "Skyline",
+			size: COLUMN_SIZE.AUTO,
+			...config,
+		}) as HomeColumnConfig,
 };
 
 export const addColumn = (config: ColumnConfig) => {

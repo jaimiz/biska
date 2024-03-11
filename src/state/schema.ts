@@ -32,6 +32,7 @@ const preferencesSchema = z.object({
 	interface: z.object({
 		profilePictureStyle: z.enum(["round", "square"]).default("square"),
 		columnSize: z.enum(["sm", "md", "lg"]).default("md"),
+		viewOption: z.enum(["single", "column"]).default("single"),
 	}),
 	behavior: z.object({
 		openProfileIn: z.enum(["app", "bsky"]).default("app"),
@@ -66,6 +67,7 @@ export const defaultAppSchema: AppSchema = {
 		interface: {
 			profilePictureStyle: "square",
 			columnSize: "md",
+			viewOption: "column",
 		},
 		behavior: {
 			openProfileIn: "bsky",

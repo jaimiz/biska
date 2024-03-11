@@ -26,7 +26,6 @@ export function useProfileQuery({ did }: { did: Did }) {
 			const res = await agent.getProfile({
 				actor: did ?? "",
 			});
-			console.log("profile", { res });
 			return res.data as ProfileViewDetailed;
 		},
 		enabled: !!did,

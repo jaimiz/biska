@@ -32,7 +32,6 @@ export const PUBLIC_BSKY_AGENT = new BskyAgent({
 export function getAgent(did: Did) {
 	const agentAtom = agentsFamily(did);
 	const agent = atomStore.get(agentAtom);
-	console.log(agent);
 	return agent;
 }
 
